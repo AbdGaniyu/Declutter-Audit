@@ -44,8 +44,16 @@ export async function seedLiveLot(sellerId: string, opts: { closesInSec?: number
 export async function signIn(page: Page, localPhone: string, name: string, next = '/') {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel('Phone number').fill(localPhone);
-  await page.getByRole('button', { name: 'Send code' }).click();
-  await page.getByLabel('6-digit code').fill('123456');
+  // GoTrue throttles OTP requests per phone; tests reuse phones, so wait it out.
+  const codeField = page.getByLabel('6-digit code');
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await page.getByRole('button', { name: 'Send code' }).click();
+    const throttled = page.getByText(/only request this after/);
+    await expect(codeField.or(throttled)).toBeVisible({ timeout: 10_000 });
+    if (await codeField.isVisible()) break;
+    await page.waitForTimeout(3000);
+  }
+  await codeField.fill('123456');
   await page.getByRole('button', { name: 'Verify' }).click();
   const nameField = page.getByLabel('First name');
   await expect.poll(async () => (await nameField.isVisible()) || new URL(page.url()).pathname === next.split('?')[0],

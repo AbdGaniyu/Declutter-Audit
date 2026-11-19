@@ -12,7 +12,8 @@
     "test:db": "supabase test db",
     "test:race": "node tests/race/bid-race.mjs",
     "test:e2e": "playwright test --trace off",
-    "db:types": "supabase gen types typescript --local > lib/database.types.ts"
+    "db:types": "supabase gen types typescript --local > lib/database.types.ts",
+    "mock:paystack": "node tests/mocks/paystack-mock.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

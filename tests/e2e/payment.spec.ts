@@ -16,14 +16,15 @@ test('win → pay → handover code → payout, with webhook replay', async ({ b
   await signIn(buyer, '08000000001', 'Ada', '/me');
   const [{ id: sellerId }] = await db<{ id: string }>(`select id from auth.users where phone = '2348000000003'`);
 
+  const title = `E2E rice cooker ${Date.now().toString(36)}`;
   // A lot that closes ~20s from now.
   const [drop] = await db<{ id: string }>(
     `insert into public.drops (title, opens_at, first_close_at)
      values ('E2E pay drop', now() - interval '1 minute', now() + interval '20 seconds') returning id`);
   const [lot] = await db<{ id: string }>(
     `insert into public.auctions (drop_id, seller_id, slot, title, condition, category, area, start_price, step, starts_at, ends_at)
-     values ($1, $2, 0, 'E2E rice cooker', 'good', 'Kitchen', 'Surulere', 2500000, public.step_for(2500000),
-             now() - interval '1 minute', now() + interval '20 seconds') returning id`, [drop!.id, sellerId]);
+     values ($1, $2, 0, $3, 'good', 'Kitchen', 'Surulere', 2500000, public.step_for(2500000),
+             now() - interval '1 minute', now() + interval '20 seconds') returning id`, [drop!.id, sellerId, title]);
 
   // Buyer bids, then waits for the close (cron runs every 5s; soft close adds 30s).
   await buyer.goto(`/lot/${lot!.id}`);
@@ -34,7 +35,7 @@ test('win → pay → handover code → payout, with webhook replay', async ({ b
 
   // Pay through the (mock) Paystack checkout.
   await buyer.getByRole('link', { name: 'Pay now' }).click();
-  await buyer.getByRole('link', { name: /E2E rice cooker/ }).click();
+  await buyer.getByRole('link', { name: new RegExp(title) }).click();
   await buyer.getByRole('button', { name: 'Pay now' }).click();
   await buyer.waitForURL(/localhost:4010\/checkout\//);
   await buyer.getByRole('button', { name: 'Pay now' }).click();

@@ -7,6 +7,17 @@ import { json } from '../_shared/http.ts';
 import { pushMessage } from '../_shared/push-messages.ts';
 import { isInternal, serviceClient } from '../_shared/supabase.ts';
 
+// Only send to browser push services (endpoints are user-supplied).
+const PUSH_HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com)$/;
+function allowedEndpoint(endpoint: string): boolean {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:' && PUSH_HOSTS.test(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
 webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'));
 
 Deno.serve(async (req) => {
@@ -30,6 +41,7 @@ Deno.serve(async (req) => {
       .eq('user_id', n.user_id);
     const message = JSON.stringify(pushMessage(n));
     for (const s of subs ?? []) {
+      if (!allowedEndpoint(s.endpoint)) continue;
       try {
         await webpush.sendNotification({ endpoint: s.endpoint, keys: s.keys }, message, { TTL: 600, urgency: 'high' });
         sent++;
