@@ -17,8 +17,8 @@ export type DropWithLots = {
   lots: LotSummary[];
 };
 
-export function DropBoard({ drops }: { drops: DropWithLots[] }) {
-  const now = useServerNow(500);
+export function DropBoard({ drops, renderedAt }: { drops: DropWithLots[]; renderedAt: number }) {
+  const now = useServerNow(500, renderedAt);
   const router = useRouter();
 
   // The list page polls lightly; the lot page is the realtime view.

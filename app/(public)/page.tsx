@@ -44,7 +44,7 @@ export default async function HomePage() {
           List an item
         </Link>
       </section>
-      <DropBoard drops={withLots} />
+      <DropBoard drops={withLots} renderedAt={Date.now()} />
     </div>
   );
 }

@@ -56,10 +56,15 @@ export function needsResync(maxAgeMs = 60_000): boolean {
   return Date.now() - lastSyncAt > maxAgeMs;
 }
 
-/** Re-renders every `tickMs` with the server-synced current time. */
-export function useServerNow(tickMs = 250): number {
-  const [now, setNow] = useState(() => serverNow());
+/**
+ * Re-renders every `tickMs` with the server-synced current time.
+ * `initialNow` (the server render time) keeps the first client render identical
+ * to the server HTML, so countdowns don't cause hydration mismatches.
+ */
+export function useServerNow(tickMs = 250, initialNow?: number): number {
+  const [now, setNow] = useState(() => initialNow ?? serverNow());
   useEffect(() => {
+    setNow(serverNow());
     const id = setInterval(() => setNow(serverNow()), tickMs);
     return () => clearInterval(id);
   }, [tickMs]);

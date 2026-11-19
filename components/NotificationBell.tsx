@@ -18,7 +18,7 @@ export function NotificationBell({ userId }: { userId: string }) {
       if (!cancelled) setUnread(count ?? 0);
     };
     void refresh();
-    const channelP = subscribeTopic(
+    const unsubscribe = subscribeTopic(
       supabase,
       `user:${userId}`,
       { notification: () => setUnread((n) => n + 1) },
@@ -29,7 +29,7 @@ export function NotificationBell({ userId }: { userId: string }) {
     return () => {
       cancelled = true;
       document.removeEventListener('visibilitychange', onFocus);
-      void channelP.then((c) => supabase.removeChannel(c));
+      unsubscribe();
     };
   }, [userId]);
 
