@@ -297,6 +297,14 @@ isOneToOne: true
 "cancel_listing":
 { Args: { "p_auction_id": string }; Returns: undefined
                            },
+"claim_push_notifications":
+{ Args: { "p_limit"?: number,"p_notification_id"?: string }; Returns: {
+              "id": string,"payload": Json,"type": string,"user_id": string
+            }[]
+                           },
+"close_due_auctions":
+{ Args: { "p_limit"?: number }; Returns: number
+                           },
 "create_listing":
 { Args: { "p_area": string,"p_category": string,"p_condition": string,"p_description": string,"p_drop_id": string,"p_start_price": number,"p_title": string }; Returns: string
                            },
@@ -315,6 +323,9 @@ isOneToOne: true
                            },
 "get_lot":
 { Args: { "p_auction_id": string }; Returns: Json
+                           },
+"mark_notifications_read":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "my_bids":
 { Args: Record<PropertyKey, never>; Returns: {

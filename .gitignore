@@ -13,3 +13,4 @@ playwright-report/
 supabase/.branches
 supabase/.temp
 supabase/functions/.env
+supabase/functions/.sandbox-ca.crt

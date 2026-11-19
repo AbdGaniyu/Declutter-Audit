@@ -51,13 +51,8 @@ select throws_ok($$ select handover_code_hash from public.orders $$, '42501', nu
                  'authenticated cannot read handover_code_hash');
 select throws_ok($$ update public.profiles set strikes = 0, bidding_suspended = false $$, '42501', null,
                  'authenticated cannot clear own strikes');
-select throws_ok($$ select public.close_due_auctions() $$, '42883', null,
-                 'close_due_auctions is not callable by clients')
-  where to_regprocedure('public.close_due_auctions()') is null
-union all
 select throws_ok($$ select public.close_due_auctions() $$, '42501', null,
-                 'close_due_auctions is not callable by clients')
-  where to_regprocedure('public.close_due_auctions()') is not null;
+                 'close_due_auctions is not callable by clients');
 
 -- bids are append-only even for the owner role -------------------------------------
 reset role;

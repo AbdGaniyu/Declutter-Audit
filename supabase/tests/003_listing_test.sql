@@ -100,6 +100,8 @@ select throws_ok(format($$ select public.relist_auction(%L, '00000000-0000-0000-
 
 -- Daily drops ---------------------------------------------------------------------------
 reset role;
+delete from public.drops d where d.opens_at > now()
+   and not exists (select 1 from public.auctions a where a.drop_id = d.id);
 select ok(public.ensure_upcoming_drops(3) >= 2, 'ensure_upcoming_drops creates daily drops');
 select is(public.ensure_upcoming_drops(3), 0, 'ensure_upcoming_drops is idempotent');
 
