@@ -51,6 +51,14 @@ export function pushMessage(n: NotificationRow): PushMessage {
       return { title: 'Payout sent', body: `${naira(p.amount)} for ${title} has been sent to your bank.`, url: '/me/sales', tag: `payout-${p.payout_id}` };
     case 'payout_failed':
       return { title: 'Payout problem', body: `We couldn't send ${naira(p.amount)} for ${title}. Check your bank details.`, url: '/me/bank', tag: `payout-${p.payout_id}` };
+    case 'sale_fell_through':
+      return { title: "Sale didn't complete", body: `${title} wasn't paid for. You can relist it in a later drop.`, url: '/me/sales', tag: `lot-${p.auction_id}` };
+    case 'dispute_opened':
+      return { title: 'A problem was reported', body: 'Our team will review the order and contact you. Payout is paused meanwhile.', url: '/me', tag: `order-${p.order_id}` };
+    case 'dispute_resolved':
+      return { title: 'Dispute resolved', body: p.resolution === 'refunded' ? 'The order was refunded to the buyer.' : 'The order was completed and the seller will be paid.', url: '/me', tag: `order-${p.order_id}` };
+    case 'unsuspended':
+      return { title: 'Bidding restored', body: 'Your account was reviewed and you can bid again. Please pay promptly when you win.', url: '/', tag: 'account' };
     default:
       return { title: 'Declutter', body: 'You have a new update.', url: '/me/notifications', tag: n.id };
   }
