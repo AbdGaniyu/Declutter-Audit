@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens from DESIGN.md */
+:root {
+  --bg: #fbf7f0;
+  --surface: #ffffff;
+  --ink: #1a1612;
+  --muted: #6b635a;
+  --line: #e8e0d4;
+  --brand: #0f7b4f;
+  --brand-ink: #ffffff;
+  --live: #e8590c;
+  --success: #1e8e3e;
+  --danger: #c62828;
+  --warn: #9a5b00;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141210;
+    --surface: #1e1b18;
+    --ink: #f3eee7;
+    --muted: #a69d92;
+    --line: #332e29;
+    --brand: #3fb07d;
+    --brand-ink: #0b1f16;
+    --live: #ff8a4c;
+    --success: #5cc97b;
+    --danger: #ff6b6b;
+    --warn: #f2b34c;
+    color-scheme: dark;
+  }
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
