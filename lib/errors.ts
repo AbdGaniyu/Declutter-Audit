@@ -26,6 +26,11 @@ const MESSAGES: Record<string, string> = {
   wrong_code: "That code doesn't match. Check with the buyer.",
   locked: 'Too many wrong codes. Our team will contact you.',
   not_payable: 'This order can no longer be paid.',
+  not_confirmable: 'This order is not ready for handover.',
+  not_disputable: 'Only paid orders can be disputed.',
+  reason_required: 'Tell us briefly what went wrong.',
+  drop_already_open: 'That drop has already opened.',
+  payment_provider_error: 'Payment provider is unavailable. Try again in a minute.',
   no_bank_account: 'Add your bank account to receive payouts.',
 };
 
