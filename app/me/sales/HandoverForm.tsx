@@ -2,11 +2,15 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/Button';
-import { ErrorText, Input, Label } from '@/components/Field';
+import { CodeInput } from '@/components/CodeInput';
+import { ErrorText } from '@/components/Field';
 import { messageFor } from '@/lib/errors';
 import { getBrowserSupabase } from '@/lib/supabase/client';
+import { formatLagosTime } from '@/lib/time';
 
-/** Seller enters the buyer's 6-digit code at pickup. That releases the payout. */
+type Result = { result: 'ok' | 'already_confirmed' | 'wrong_code' | 'locked'; tries_left?: number; retry_at?: string };
+
+/** Seller enters the buyer's code at pickup. That releases the payout. 5 tries per hour. */
 export function HandoverForm({ orderId }: { orderId: string }) {
   const router = useRouter();
   const [code, setCode] = useState('');
@@ -20,21 +24,22 @@ export function HandoverForm({ orderId }: { orderId: string }) {
     const { data, error: rpcError } = await getBrowserSupabase().rpc('confirm_handover', { p_order_id: orderId, p_code: code });
     setBusy(false);
     if (rpcError) return setError(messageFor(rpcError.message));
-    if (data === 'ok' || data === 'already_confirmed') return router.refresh();
-    setError(messageFor(data as string));
-    if (data === 'wrong_code') setCode('');
+    const r = data as unknown as Result;
+    if (r.result === 'ok' || r.result === 'already_confirmed') return router.refresh();
+    setCode('');
+    if (r.result === 'wrong_code') {
+      setError(`That code doesn't match. ${r.tries_left} ${r.tries_left === 1 ? 'try' : 'tries'} left this hour.`);
+    } else {
+      setError(`Too many wrong codes. Try again after ${r.retry_at ? formatLagosTime(r.retry_at) : 'an hour'}.`);
+    }
   }
 
   return (
-    <form onSubmit={submit} className="space-y-2">
-      <Label htmlFor={`code-${orderId}`}>Buyer's handover code</Label>
-      <div className="flex gap-2">
-        <Input id={`code-${orderId}`} inputMode="numeric" autoComplete="off" maxLength={6} placeholder="6 digits"
-          className="font-mono tracking-[0.3em]" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
-        <Button type="submit" disabled={busy || code.length !== 6}>Confirm</Button>
-      </div>
-      <p className="text-small text-muted">Ask for the code only when you hand over the item.</p>
+    <form onSubmit={submit} className="space-y-3">
+      <CodeInput value={code} onChange={setCode} label="Buyer's handover code" idPrefix={`code-${orderId}`} />
       <ErrorText>{error}</ErrorText>
+      <Button type="submit" block tall busy={busy} disabled={code.length !== 6}>Confirm handover</Button>
+      <p className="text-body text-ink-muted">Ask for the code only when you hand over the item.</p>
     </form>
   );
 }

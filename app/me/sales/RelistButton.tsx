@@ -15,10 +15,10 @@ export function RelistButton({ auctionId, drops }: { auctionId: string; drops: {
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2">
       <select aria-label="Drop to relist into" value={dropId} onChange={(e) => setDropId(e.target.value)}
-        className="min-h-9 rounded-pill border border-line bg-surface px-2 text-small">
+        className="min-h-11 rounded-pill border border-line bg-surface px-3 text-body">
         {drops.map((d) => <option key={d.id} value={d.id}>{formatLagosDateTime(d.opens_at)}</option>)}
       </select>
-      <button type="button" disabled={busy} className="min-h-9 rounded-pill bg-brand px-3 text-small font-semibold text-brand-ink"
+      <button type="button" disabled={busy} className="min-h-11 rounded-pill bg-ink px-4 font-semibold text-white disabled:opacity-40"
         onClick={async () => {
           setBusy(true);
           const { data, error: e } = await getBrowserSupabase().rpc('relist_auction', { p_auction_id: auctionId, p_drop_id: dropId });

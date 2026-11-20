@@ -16,21 +16,24 @@ export default async function NotificationsPage() {
   const now = Date.now();
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-lot space-y-4">
       <MarkRead />
-      <h1 className="text-title">Notifications</h1>
+      <h1 className="font-display text-display">Notifications</h1>
       {!rows?.length ? (
-        <p className="text-muted">Nothing yet.</p>
+        <p className="text-ink-muted">Nothing yet.</p>
       ) : (
-        <ul className="divide-y divide-line rounded-card border border-line bg-surface">
+        <ul className="divide-y divide-line overflow-hidden rounded-card bg-surface shadow-elev">
           {rows.map((n) => {
             const m = pushMessage({ id: n.id, type: n.type, payload: (n.payload ?? {}) as Record<string, unknown> });
             return (
               <li key={n.id}>
-                <Link href={m.url} className="block px-4 py-3">
-                  <p className={`font-semibold ${n.read_at ? '' : 'text-brand'}`}>{m.title}</p>
-                  <p className="text-small">{m.body}</p>
-                  <p className="text-small text-muted">{formatLagosDateTime(n.created_at, now)}</p>
+                <Link href={m.url} className="flex gap-3 px-4 py-3">
+                  <span className={`mt-2 h-2 w-2 shrink-0 rounded-pill ${n.read_at ? 'bg-transparent' : 'bg-focus'}`} aria-label={n.read_at ? undefined : 'Unread'} />
+                  <span>
+                    <span className="block font-semibold">{m.title}</span>
+                    <span className="block">{m.body}</span>
+                    <span className="block text-body text-ink-muted">{formatLagosDateTime(n.created_at, now)}</span>
+                  </span>
                 </Link>
               </li>
             );

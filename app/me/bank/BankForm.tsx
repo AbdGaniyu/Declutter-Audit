@@ -49,13 +49,13 @@ export function BankForm({ hasBank }: { hasBank: boolean }) {
       </div>
       <div>
         <Label htmlFor="acct">Account number (NUBAN)</Label>
-        <Input id="acct" inputMode="numeric" maxLength={10} value={account}
+        <Input id="acct" inputMode="numeric" className="font-num tabular-nums" maxLength={10} value={account}
           onChange={(e) => setAccount(e.target.value.replace(/\D/g, ''))} required />
       </div>
-      {saved && <p className="text-small text-success">Saved: {saved}</p>}
+      {saved && <p className="rounded-card bg-winning-soft p-3 font-semibold text-ink">Saved: {saved}</p>}
       <ErrorText>{error}</ErrorText>
-      <Button type="submit" block disabled={busy || !bankCode || account.length !== 10}>
-        {busy ? 'Verifying…' : hasBank ? 'Update account' : 'Verify and save'}
+      <Button type="submit" block tall busy={busy} disabled={!bankCode || account.length !== 10}>
+        {hasBank ? 'Update account' : 'Verify and save'}
       </Button>
     </form>
   );

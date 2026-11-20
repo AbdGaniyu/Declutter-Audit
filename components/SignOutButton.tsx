@@ -6,7 +6,7 @@ import { getBrowserSupabase } from '@/lib/supabase/client';
 export function SignOutButton() {
   const router = useRouter();
   return (
-    <Button variant="ghost" onClick={async () => {
+    <Button variant="link" onClick={async () => {
       await getBrowserSupabase().auth.signOut();
       router.replace('/');
       router.refresh();

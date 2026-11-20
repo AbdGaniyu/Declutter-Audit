@@ -55,3 +55,20 @@ export function lotPhase(startsAt: string, endsAt: string, closedAt: string | nu
   if (now < Date.parse(endsAt)) return 'live';
   return 'ended';
 }
+
+/** "2h 14m", "14m", "45s": for "Opens in …". */
+export function formatDuration(ms: number): string {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m`;
+  return `${s}s`;
+}
+
+const goLiveFmt = new Intl.DateTimeFormat('en-NG', { timeZone: LAGOS_TZ, weekday: 'short' });
+/** "Fri 7pm" or "Fri 7:30pm": for "Your lot goes live …". */
+export function formatGoLive(d: Date | string | number): string {
+  const t = formatLagosTime(d).replace(':00', '');
+  return `${goLiveFmt.format(new Date(d))} ${t}`;
+}

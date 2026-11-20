@@ -1,14 +1,19 @@
 import { Suspense } from 'react';
+import { Card } from '@/components/Field';
 import { LoginForm } from './LoginForm';
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="text-title">Sign in with your phone</h1>
-      <p className="mt-1 text-small text-muted">We'll text you a 6-digit code. Only verified numbers can bid or sell.</p>
-      <Suspense>
-        <LoginForm />
-      </Suspense>
+    <div className="mx-auto max-w-lot space-y-4">
+      <div>
+        <h1 className="font-display text-display">Verify your phone</h1>
+        <p className="mt-1 text-body text-ink-muted">We'll text you a 6-digit code. Browsing is open to everyone; you only need this to bid or sell.</p>
+      </div>
+      <Card>
+        <Suspense>
+          <LoginForm />
+        </Suspense>
+      </Card>
     </div>
   );
 }

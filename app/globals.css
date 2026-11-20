@@ -2,37 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tokens from DESIGN.md */
+/* Tokens from DESIGN.md. Light only: dark mode is v2. */
 :root {
-  --bg: #fbf7f0;
+  --bg: #faf7f2;
   --surface: #ffffff;
-  --ink: #1a1612;
-  --muted: #6b635a;
-  --line: #e8e0d4;
-  --brand: #0f7b4f;
-  --brand-ink: #ffffff;
-  --live: #e8590c;
-  --success: #1e8e3e;
-  --danger: #c62828;
-  --warn: #9a5b00;
+  --ink: #14110f;
+  --ink-muted: #6b645c;
+  --line: #e7e1d8;
+  --live: #e4572e;
+  --live-soft: #fde9e2;
+  --winning: #1f8a4c;
+  --winning-soft: #e3f4ea;
+  --outbid: #c98a00;
+  --outbid-soft: #fdf3dc;
+  --ended: #8a847c;
+  --focus: #2e6be4;
+  --shadow: 0 1px 2px rgba(20, 17, 15, 0.06), 0 4px 16px rgba(20, 17, 15, 0.06);
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #141210;
-    --surface: #1e1b18;
-    --ink: #f3eee7;
-    --muted: #a69d92;
-    --line: #332e29;
-    --brand: #3fb07d;
-    --brand-ink: #0b1f16;
-    --live: #ff8a4c;
-    --success: #5cc97b;
-    --danger: #ff6b6b;
-    --warn: #f2b34c;
-    color-scheme: dark;
-  }
 }
 
 html,
@@ -43,4 +29,59 @@ body {
 
 body {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Every focus state is visible: --focus 2px ring. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- Motion (DESIGN.md › Motion). Reduced motion keeps only the color flash. --- */
+@keyframes flash-live-soft {
+  0% { background-color: var(--live-soft); }
+  100% { background-color: transparent; }
+}
+.flash-live-soft {
+  animation: flash-live-soft 400ms ease-out;
+}
+
+@keyframes slide-in-top {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.slide-in-top {
+  animation: slide-in-top 200ms ease-out;
+}
+
+/* "+30s" pill: scales in, holds 1.5s, fades out. */
+@keyframes extension-pill {
+  0% { transform: scale(0.6); opacity: 0; }
+  10% { transform: scale(1); opacity: 1; }
+  85% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+.extension-pill {
+  animation: extension-pill 1800ms ease-out forwards;
+}
+
+/* Bid sheet rejection: one gentle shake. */
+@keyframes gentle-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.gentle-shake {
+  animation: gentle-shake 280ms ease-in-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-in-top,
+  .gentle-shake {
+    animation: none;
+  }
+  .extension-pill {
+    animation: none;
+    opacity: 1;
+  }
 }

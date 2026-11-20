@@ -19,7 +19,12 @@ export type Lot = {
   outcome: 'sold' | 'unsold' | 'defaulted' | 'cancelled' | null;
   leader_no: number | null;
   seller_name: string;
+  seller_verified: boolean;
+  seller_since: string | null;
   is_seller: boolean;
+  my_suspended: boolean;
+  my_verified: boolean;
+  my_order: { id: string; status: string; pay_by: string; offer_round: number; amount: number } | null;
   my_bidder_no: number | null;
   you_are_leading: boolean;
   my_max_bid: number | null;

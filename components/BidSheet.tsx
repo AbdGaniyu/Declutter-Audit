@@ -1,34 +1,30 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
-import { ErrorText, Input } from '@/components/Field';
+import { ErrorText, Input, Label } from '@/components/Field';
+import { Sheet } from '@/components/Sheet';
 import { formatNaira, parseNairaInput } from '@/lib/money';
 
-/** Bottom sheet: min next bid preselected, quick +step buttons, confirm. */
-export function BidSheet({
-  open,
-  minNext,
-  step,
-  busy,
-  error,
-  onClose,
-  onConfirm,
-}: {
+export type Rejection = { key: number; message: string } | null;
+
+/**
+ * DESIGN.md › Bid sheet: quick picks min, +1 step, +2 steps, plus a custom
+ * amount. One tap confirms (no second dialog). On rejection the sheet shakes
+ * once, gently, shows the reason, and the new minimum is prefilled.
+ */
+export function BidSheet({ open, minNext, step, busy, rejection, onClose, onConfirm }: {
   open: boolean;
   minNext: number;
   step: number;
   busy: boolean;
-  error: string | null;
+  rejection: Rejection;
   onClose: () => void;
   onConfirm: (amountKobo: number) => void;
 }) {
   const [amount, setAmount] = useState(minNext);
   const [typed, setTyped] = useState('');
+  const [shakeKey, setShakeKey] = useState(0);
 
-  // When someone else bids, never leave a now-invalid amount selected.
-  useEffect(() => {
-    setAmount((a) => (a < minNext ? minNext : a));
-  }, [minNext]);
   useEffect(() => {
     if (open) {
       setAmount(minNext);
@@ -37,47 +33,61 @@ export function BidSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  if (!open) return null;
-  const quick = [0, 1, 2, 5].map((n) => minNext + n * step);
+  // Someone else bid: never leave a now-invalid amount selected.
+  useEffect(() => {
+    setAmount((a) => (a < minNext ? minNext : a));
+  }, [minNext]);
 
-  function onType(v: string) {
-    setTyped(v);
-    const k = parseNairaInput(v);
-    if (k !== null) setAmount(k);
-  }
+  // Rejected: shake once and prefill the new minimum.
+  useEffect(() => {
+    if (!rejection) return;
+    setShakeKey(rejection.key);
+    setAmount(minNext);
+    setTyped('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rejection?.key]);
 
+  const picks = [
+    { label: 'Min', value: minNext },
+    { label: '+1 step', value: minNext + step },
+    { label: '+2 steps', value: minNext + 2 * step },
+  ];
   const valid = amount >= minNext && amount % 100 === 0;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40" role="dialog" aria-modal="true" aria-label="Place a bid"
-      onClick={(e) => e.target === e.currentTarget && !busy && onClose()}>
-      <div className="w-full max-w-3xl rounded-t-card bg-surface p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-pill bg-line" aria-hidden />
-        <p className="text-small text-muted">Minimum bid {formatNaira(minNext)}</p>
-        <div className="mt-3 grid grid-cols-4 gap-2">
-          {quick.map((q) => (
-            <button key={q} type="button" onClick={() => { setAmount(q); setTyped(''); }}
-              className={`min-h-11 rounded-pill border text-small font-semibold tabular-nums ${
-                amount === q ? 'border-brand bg-brand text-brand-ink' : 'border-line bg-surface text-ink'}`}>
-              {formatNaira(q)}
-            </button>
-          ))}
+    <Sheet open={open} onClose={() => !busy && onClose()} title="Place your bid">
+      <div key={shakeKey} className={shakeKey ? 'gentle-shake' : ''}>
+        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Quick picks">
+          {picks.map((p) => {
+            const on = amount === p.value && !typed;
+            return (
+              <button key={p.label} type="button" role="radio" aria-checked={on}
+                onClick={() => { setAmount(p.value); setTyped(''); }}
+                className={`flex min-h-14 flex-col items-center justify-center rounded-card border ${
+                  on ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-ink'}`}>
+                <span className="text-label uppercase">{p.label}</span>
+                <span className="font-num text-[17px] font-semibold tabular-nums">{formatNaira(p.value)}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="mt-3">
-          <Input inputMode="numeric" aria-label="Custom amount in naira" placeholder="Or type an amount (₦)"
-            value={typed} onChange={(e) => onType(e.target.value)} />
+          <Label htmlFor="custom-bid">Custom amount (₦)</Label>
+          <Input id="custom-bid" inputMode="numeric" placeholder={formatNaira(minNext).slice(1)}
+            className="font-num tabular-nums" value={typed}
+            onChange={(e) => {
+              setTyped(e.target.value);
+              const k = parseNairaInput(e.target.value);
+              if (k !== null) setAmount(k);
+            }} />
+          {typed && !valid && <p className="mt-1 text-body text-ink-muted">At least {formatNaira(minNext)}, in whole naira.</p>}
         </div>
-        <ErrorText>{error}</ErrorText>
-        <div className="mt-4 flex gap-2">
-          <Button variant="secondary" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button block disabled={busy || !valid} onClick={() => onConfirm(amount)}>
-            {busy ? 'Placing bid…' : `Bid ${formatNaira(amount)}`}
-          </Button>
-        </div>
-        <p className="mt-3 text-center text-small text-muted">
-          If you win, you have 30 minutes to pay. Unpaid wins get a strike.
-        </p>
+        <ErrorText>{rejection?.message}</ErrorText>
+        <Button variant="live" tall block className="mt-4" busy={busy} disabled={!valid} onClick={() => onConfirm(amount)}>
+          Bid {formatNaira(amount)}
+        </Button>
+        <p className="mt-3 text-center text-body text-ink-muted">Pay within 30 minutes if you win, or it goes to the next bidder.</p>
       </div>
-    </div>
+    </Sheet>
   );
 }

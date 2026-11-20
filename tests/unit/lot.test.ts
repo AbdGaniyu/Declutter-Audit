@@ -5,7 +5,8 @@ const base: Lot = {
   id: 'a', drop_id: 'd', drop_title: 'Drop', title: 'Fan', description: '', condition: 'good',
   category: 'Home', area: 'Yaba', start_price: 1_500_000, step: 50_000, current_bid: 1_500_000,
   bid_count: 1, min_next: 1_550_000, starts_at: '2026-11-19T18:00:00Z', ends_at: '2026-11-19T18:30:00Z',
-  closed_at: null, outcome: null, leader_no: 1, seller_name: 'Ada', is_seller: false,
+  closed_at: null, outcome: null, leader_no: 1, seller_name: 'Ada', seller_verified: true, seller_since: null, is_seller: false,
+  my_suspended: false, my_verified: true, my_order: null,
   my_bidder_no: 1, you_are_leading: true, my_max_bid: 1_500_000, photos: [], server_now: '',
 };
 

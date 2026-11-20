@@ -13,31 +13,24 @@ export async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between gap-3 px-4">
-        <Link href="/" className="text-title text-brand">
+    <header className="sticky top-0 z-30 border-b border-line bg-surface">
+      <div className="mx-auto flex h-14 w-full max-w-grid items-center justify-between gap-3 px-4">
+        {/* Wordmark is "not decided yet" in DESIGN.md: plain display type for now. */}
+        <Link href="/" className="font-display text-heading text-ink">
           Declutter
         </Link>
-        <nav className="flex items-center gap-1 text-small font-semibold">
+        <nav className="flex items-center gap-1 text-body font-semibold">
           {isAdmin && (
-            <Link href="/admin" className="rounded-pill px-3 py-2 text-muted">
-              Admin
-            </Link>
+            <Link href="/admin" className="inline-flex min-h-11 items-center rounded-pill px-3 text-ink-muted">Admin</Link>
           )}
-          <Link href="/sell" className="rounded-pill px-3 py-2 text-ink">
-            Sell
-          </Link>
+          <Link href="/sell" className="inline-flex min-h-11 items-center rounded-pill px-3 text-ink">Sell</Link>
           {user ? (
             <>
               <NotificationBell userId={user.id} />
-              <Link href="/me" className="rounded-pill bg-brand px-4 py-2 text-brand-ink">
-                Me
-              </Link>
+              <Link href="/me" className="inline-flex min-h-11 items-center rounded-pill bg-ink px-4 text-white">Me</Link>
             </>
           ) : (
-            <Link href="/login" className="rounded-pill bg-brand px-4 py-2 text-brand-ink">
-              Sign in
-            </Link>
+            <Link href="/login" className="inline-flex min-h-11 items-center rounded-pill bg-ink px-4 text-white">Sign in</Link>
           )}
         </nav>
       </div>

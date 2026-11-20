@@ -1,27 +1,20 @@
 'use client';
+import { Phone, ShieldCheck } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
-import { Countdown } from '@/components/Countdown';
-import { ErrorText } from '@/components/Field';
+import { DisputeButton } from '@/components/DisputeButton';
+import { Card, ErrorText } from '@/components/Field';
+import { iconProps } from '@/components/icons';
 import { messageFor } from '@/lib/errors';
 import { statusLabel } from '@/lib/orders';
 import { subscribeTopic } from '@/lib/realtime';
 import { getBrowserSupabase } from '@/lib/supabase/client';
-import { formatLagosTime } from '@/lib/time';
+import { formatCountdown, formatLagosTime } from '@/lib/time';
 import { useServerNow } from '@/lib/time-sync';
-import { DisputeButton } from '@/components/DisputeButton';
 
 type Props = {
-  order: {
-    id: string;
-    auction_id: string;
-    status: string;
-    pay_by: string;
-    offer_round: number;
-    seller_phone: string | null;
-    refunded_at: string | null;
-  };
+  order: { id: string; status: string; pay_by: string; offer_round: number; seller_phone: string | null; refunded_at: string | null };
   userId: string;
 };
 
@@ -36,16 +29,13 @@ export function BuyerOrderActions({ order, userId }: Props) {
   const [confirming, setConfirming] = useState(params.get('paid') === '1' && order.status === 'awaiting_payment');
 
   // Order updates arrive as notifications on user:<id>.
-  useEffect(() => {
-    return subscribeTopic(supabase, `user:${userId}`, { notification: () => router.refresh() });
-  }, [supabase, userId, router]);
+  useEffect(() => subscribeTopic(supabase, `user:${userId}`, { notification: () => router.refresh() }), [supabase, userId, router]);
 
-  // Back from Paystack: ask the server to verify (webhook may be slower), then poll.
+  // Back from Paystack: ask the server to verify (the webhook may be slower), then poll.
   useEffect(() => {
     if (!confirming) return;
     let tries = 0;
-    void supabase.functions.invoke('paystack-init', { body: { order_id: order.id, action: 'verify' } })
-      .finally(() => router.refresh());
+    void supabase.functions.invoke('paystack-init', { body: { order_id: order.id, action: 'verify' } }).finally(() => router.refresh());
     const id = setInterval(() => {
       tries++;
       router.refresh();
@@ -65,7 +55,6 @@ export function BuyerOrderActions({ order, userId }: Props) {
     const { data } = await supabase.rpc('get_handover_code', { p_order_id: order.id });
     setCode((data as string | null) ?? null);
   }, [supabase, order.id]);
-
   useEffect(() => {
     if (order.status === 'paid') void loadCode();
   }, [order.status, loadCode]);
@@ -83,7 +72,6 @@ export function BuyerOrderActions({ order, userId }: Props) {
   }
 
   async function decline() {
-    if (!confirm('Decline this offer? It will not count as a strike.')) return;
     setBusy(true);
     const { error: e } = await supabase.rpc('decline_second_chance', { p_order_id: order.id });
     setBusy(false);
@@ -91,34 +79,47 @@ export function BuyerOrderActions({ order, userId }: Props) {
     router.refresh();
   }
 
+  const explainer = (
+    <div className="flex gap-3 rounded-card border border-line bg-surface p-4">
+      <ShieldCheck {...iconProps} size={24} className="shrink-0 text-winning" />
+      <div>
+        <p className="font-semibold">Your money is held until you collect the item</p>
+        <p className="mt-1 text-body text-ink-muted">
+          We only pay the seller after you have the item and give them your 6-digit handover code. If something's wrong, report it and we'll step in.
+        </p>
+      </div>
+    </div>
+  );
+
   if (order.status === 'awaiting_payment') {
     const left = Date.parse(order.pay_by) - now;
     if (confirming) {
       return (
-        <div className="rounded-card border border-line bg-surface p-4 text-center">
+        <Card className="text-center">
           <p className="font-semibold">Confirming your payment…</p>
-          <p className="mt-1 text-small text-muted">This usually takes a few seconds. You can leave this page.</p>
-        </div>
+          <p className="mt-1 text-body text-ink-muted">This usually takes a few seconds. You can leave this page.</p>
+        </Card>
       );
     }
     return (
-      <div className="space-y-3">
-        <div className="rounded-card border border-line bg-surface p-4">
-          <p className="text-small text-muted">Pay by {formatLagosTime(order.pay_by)}</p>
+      <div className="space-y-4">
+        <Card>
+          <p className="text-label uppercase text-ink-muted">Pay within</p>
           {left > 0 ? (
-            <Countdown endsAt={order.pay_by} now={now} className="text-display" />
+            <p className={`font-num text-countdown tabular-nums ${left <= 60_000 ? 'text-live' : 'text-ink'}`}>{formatCountdown(left)}</p>
           ) : (
-            <p className="text-small text-warn">Time is up. If you already paid, it will be confirmed or refunded.</p>
+            <p className="text-ink">Time is up. If you already paid, it will be confirmed or refunded.</p>
           )}
-          <p className="mt-2 text-small text-muted">
-            Card, bank transfer or USSD via Paystack. Your money is held until you collect the item and give the seller
-            your handover code.
+          <p className="mt-1 text-body text-ink-muted">
+            By {formatLagosTime(order.pay_by)}, or it goes to the next bidder{order.offer_round === 1 ? ' and counts as a strike' : ''}.
           </p>
-        </div>
+        </Card>
+        {explainer}
         <ErrorText>{error}</ErrorText>
-        <Button block onClick={pay} disabled={busy || left <= 0}>{busy ? 'Opening Paystack…' : 'Pay now'}</Button>
+        <Button block tall busy={busy} disabled={left <= 0} onClick={pay}>Pay now</Button>
+        <p className="text-center text-body text-ink-muted">Card, bank transfer or USSD, via Paystack.</p>
         {order.offer_round === 2 && (
-          <Button block variant="ghost" onClick={decline} disabled={busy}>No thanks, decline offer</Button>
+          <Button block variant="link" disabled={busy} onClick={decline}>No thanks, decline this offer</Button>
         )}
       </div>
     );
@@ -126,17 +127,15 @@ export function BuyerOrderActions({ order, userId }: Props) {
 
   if (order.status === 'paid') {
     return (
-      <div className="space-y-3">
-        <div className="rounded-card border border-line bg-surface p-4 text-center">
-          <p className="text-small text-muted">Your handover code</p>
-          <p className="my-2 font-mono text-display tracking-[0.3em]" aria-label="Handover code">{code ?? '······'}</p>
-          <p className="text-small">
-            Give this code to the seller <strong>only once you have the item</strong>. It releases your payment to them.
-          </p>
-        </div>
+      <div className="space-y-4">
+        <Card className="text-center">
+          <p className="text-label uppercase text-ink-muted">Your handover code</p>
+          <p className="my-3 font-num text-code tabular-nums" aria-label="Handover code">{code ?? '······'}</p>
+          <p className="font-semibold">Give this code to the seller only when you have the item.</p>
+        </Card>
         {order.seller_phone && (
-          <a href={`tel:+${order.seller_phone}`} className="flex min-h-11 items-center justify-center rounded-pill border border-line bg-surface font-semibold">
-            Call seller to arrange pickup
+          <a href={`tel:+${order.seller_phone}`} className="flex min-h-11 items-center justify-center gap-2 rounded-pill border border-line bg-surface font-semibold">
+            <Phone {...iconProps} size={18} /> Call seller to arrange pickup
           </a>
         )}
         <DisputeButton orderId={order.id} />
@@ -145,20 +144,17 @@ export function BuyerOrderActions({ order, userId }: Props) {
   }
 
   return (
-    <div className="rounded-card border border-line bg-surface p-4">
+    <Card>
       <p className="font-semibold">{statusLabel(order.status)}</p>
-      {order.status === 'expired' && (
-        <p className="mt-1 text-small text-muted">
-          {order.refunded_at
-            ? 'Your payment arrived after the deadline and has been refunded.'
-            : order.offer_round === 1
-              ? "The 30-minute payment window closed. This counts as a strike on your account."
-              : 'The offer has expired.'}
-        </p>
-      )}
-      {order.status === 'disputed' && <p className="mt-1 text-small text-muted">Our team is reviewing this order and will contact you.</p>}
-      {(order.status === 'handed_over' || order.status === 'paid_out') && <p className="mt-1 text-small text-muted">Enjoy your item!</p>}
-      {order.status === 'refunded' && <p className="mt-1 text-small text-muted">Your money has been returned via Paystack.</p>}
-    </div>
+      <p className="mt-1 text-body text-ink-muted">
+        {order.status === 'expired' && (order.refunded_at
+          ? 'Your payment arrived after the deadline, so it has been refunded.'
+          : order.offer_round === 1 ? "The 30-minute window closed. This counts as a strike on your account." : 'The offer expired.')}
+        {order.status === 'disputed' && 'Our team is reviewing this order and will call you.'}
+        {(order.status === 'handed_over' || order.status === 'paid_out') && 'Collected. Enjoy it!'}
+        {order.status === 'refunded' && 'Your money has been returned through Paystack.'}
+        {order.status === 'declined' && 'You declined this offer.'}
+      </p>
+    </Card>
   );
 }

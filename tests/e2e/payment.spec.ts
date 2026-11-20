@@ -28,14 +28,15 @@ test('win → pay → handover code → payout, with webhook replay', async ({ b
 
   // Buyer bids, then waits for the close (cron runs every 5s; soft close adds 30s).
   await buyer.goto(`/lot/${lot!.id}`);
-  await buyer.getByRole('button', { name: /Place bid/ }).click();
-  await buyer.getByRole('button', { name: 'Bid ₦25,000' }).click();
-  await expect(buyer.getByText("You're winning").first()).toBeVisible();
-  await expect(buyer.getByText('You won!')).toBeVisible({ timeout: 60_000 });
+  await buyer.getByRole('button', { name: /^Bid ₦/ }).last().click();
+  await buyer.getByRole('dialog', { name: 'Place your bid' }).getByRole('button', { name: 'Bid ₦25,000' }).click();
+  await expect(buyer.getByText(/You're winning at/)).toBeVisible();
+  // Won banner counts down to pay_by and links straight to the pay screen.
+  await expect(buyer.getByText(/You won! Pay within/)).toBeVisible({ timeout: 60_000 });
 
   // Pay through the (mock) Paystack checkout.
   await buyer.getByRole('link', { name: 'Pay now' }).click();
-  await buyer.getByRole('link', { name: new RegExp(title) }).click();
+  await expect(buyer.getByText('Your money is held until you collect the item')).toBeVisible();
   await buyer.getByRole('button', { name: 'Pay now' }).click();
   await buyer.waitForURL(/localhost:4010\/checkout\//);
   await buyer.getByRole('button', { name: 'Pay now' }).click();
@@ -65,11 +66,14 @@ test('win → pay → handover code → payout, with webhook replay', async ({ b
   await expect(seller.getByText('Saved: ADAEZE TEST OKAFOR')).toBeVisible();
 
   await seller.goto('/me/sales');
-  await seller.getByLabel("Buyer's handover code").fill(code === '000000' ? '111111' : '000000');
-  await seller.getByRole('button', { name: 'Confirm' }).click();
-  await expect(seller.getByText("That code doesn't match")).toBeVisible();
-  await seller.getByLabel("Buyer's handover code").fill(code);
-  await seller.getByRole('button', { name: 'Confirm' }).click();
+  await expect(seller.getByRole('heading', { name: 'Ready for pickup' })).toBeVisible();
+  const card = seller.getByRole('article', { name: title });
+  const firstBox = card.getByLabel("Buyer's handover code digit 1");
+  await firstBox.fill(code === '000000' ? '111111' : '000000'); // fills all six boxes
+  await card.getByRole('button', { name: 'Confirm handover' }).click();
+  await expect(card.getByText("That code doesn't match. 4 tries left this hour.")).toBeVisible();
+  await firstBox.fill(code);
+  await card.getByRole('button', { name: 'Confirm handover' }).click();
 
   // Payout: pg_net → payout function → mock transfer → transfer.success webhook.
   await expect.poll(async () => {

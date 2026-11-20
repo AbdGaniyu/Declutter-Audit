@@ -71,11 +71,21 @@ The e2e payment test needs the Edge Functions running with `PAYSTACK_API_URL` po
 5. **Vercel:** set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `NEXT_PUBLIC_VAPID_PUBLIC_KEY` only. No secret key ever goes to Next.js.
 6. **Settings** live in `private.settings` (commission, pay window, grace, strikes, drop hour). Change them with a migration.
 
+## How the UI applies DESIGN.md
+
+- **Tokens:** colors, type and shape are in `app/globals.css` and `tailwind.config.ts`. Fonts are self-hosted with `next/font`. Icons are Lucide at 1.75 stroke.
+- **Contrast:** `--live`, `--winning`, `--outbid` and `--ended` don't reach WCAG AA (4.5:1) as small text on white. They're used for fills, icons, dots and the large countdown and price numbers (which only need 3:1). Small status text stays `--ink` on the matching `-soft` background, with an icon so status never relies on color.
+- **Lot page order:** the price and countdown block sits right under the status banner, above the title. Following the key-screens order literally pushed the clock below the sticky bar on a 360×780 phone, which breaks principle #1 ("the clock is the hero").
+- **Bid sheet shake:** principle #5 says "never shake", but the bid sheet spec asks for one gentle shake on rejection. It shakes once (4px, 280ms), and not at all with reduced motion.
+- **Sell flow:** "3 steps" is read as Photos → Details → Drop, followed by a Review screen.
+- **"+30s" pill:** shown whenever a bid extends `ends_at`, matching the copy in the doc, even when the extension is shorter than 30s.
+
 ## Decisions and additions beyond CLAUDE.md
 
-- **DESIGN.md** didn't exist, so a first draft was written and the Tailwind config uses only its tokens.
 - **Broadcast payload** sends `leader_no` rather than `leader_id`, to honour the masking rule.
 - **`place_bid` reasons** add `not_authenticated`, `not_verified`, `invalid_amount` (whole naira, ≤ ₦50m), `not_found`, `cancelled` and `already_leading` (the leader can't raise their own bid) to the spec'd five.
 - **Schema additions:** `profiles.is_admin`; `drops.max_lots`; `auctions.slot` and `relisted_from`; `orders.offer_round`, `handover_attempts`, `dispute_reason`, `refunded_at`, checkout fields and a `declined` status; `payouts.failure_reason` and `attempts`; `notifications.pushed_at`; `auction_bidders` (pseudonyms); `ops_alerts`; `private.paystack_events` (webhook audit log).
 - **Paystack needs an email:** buyers sign in by phone, so checkout uses `buyer-<uid>@BUYER_EMAIL_DOMAIN`.
+- **Handover code:** 5 wrong tries per rolling hour (from DESIGN.md), then locked until the hour is up, with an ops alert.
+- **Drop reminders:** "Remind me" saves a reminder, and a cron job notifies and pushes when the drop opens.
 - **Disputes:** buyer or seller can dispute a paid order (payout paused). Admins either release to the seller or refund via the `admin-refund` function.
