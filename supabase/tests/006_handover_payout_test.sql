@@ -33,11 +33,11 @@ select throws_ok(format($$ select public.confirm_handover('00000000-0000-0000-00
 -- Seller: wrong code counts an attempt, right code confirms.
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}';
 select is(public.confirm_handover('00000000-0000-0000-0000-00000000e001',
-          case when (select code from t_code) = '000000' then '111111' else '000000' end), 'wrong_code', 'wrong code rejected');
+          case when (select code from t_code) = '000000' then '111111' else '000000' end) ->> 'result', 'wrong_code', 'wrong code rejected');
 select is((select handover_attempts from public.orders where id = '00000000-0000-0000-0000-00000000e001'), 1,
           'wrong attempt is recorded');
-select is(public.confirm_handover('00000000-0000-0000-0000-00000000e001', (select code from t_code)), 'ok', 'right code confirms');
-select is(public.confirm_handover('00000000-0000-0000-0000-00000000e001', (select code from t_code)), 'already_confirmed',
+select is(public.confirm_handover('00000000-0000-0000-0000-00000000e001', (select code from t_code)) ->> 'result', 'ok', 'right code confirms');
+select is(public.confirm_handover('00000000-0000-0000-0000-00000000e001', (select code from t_code)) ->> 'result', 'already_confirmed',
           'confirming twice is a no-op');
 reset role;
 

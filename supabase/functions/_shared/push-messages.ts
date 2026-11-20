@@ -59,6 +59,8 @@ export function pushMessage(n: NotificationRow): PushMessage {
       return { title: 'Dispute resolved', body: p.resolution === 'refunded' ? 'The order was refunded to the buyer.' : 'The order was completed and the seller will be paid.', url: '/me', tag: `order-${p.order_id}` };
     case 'unsuspended':
       return { title: 'Bidding restored', body: 'Your account was reviewed and you can bid again. Please pay promptly when you win.', url: '/', tag: 'account' };
+    case 'drop_live':
+      return { title: `${String(p.title ?? 'Tonight\'s drop')} is live`, body: `Bidding is open. First lot closes at ${lagosTime(p.first_close_at)}.`, url: '/', tag: `drop-${p.drop_id}` };
     default:
       return { title: 'Declutter', body: 'You have a new update.', url: '/me/notifications', tag: n.id };
   }

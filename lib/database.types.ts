@@ -133,6 +133,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"drop_reminders": {
+                  Row: {
+                    "created_at": string,"drop_id": string,"notified_at": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"drop_id": string,"notified_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"drop_id"?: string,"notified_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "drop_reminders_drop_id_fkey"
+      columns: ["drop_id"]
+isOneToOne: false
+      referencedRelation: "drops"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "drop_reminders_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"drops": {
                   Row: {
                     "close_interval": string,"created_at": string,"first_close_at": string,"id": string,"max_lots": number,"opens_at": string,"status": string,"title": string
@@ -189,14 +215,14 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "amount": number,"auction_id": string,"buyer_id": string,"commission": number,"created_at": string,"dispute_reason": string | null,"handed_over_at": string | null,"handover_attempts": number,"handover_code_hash": string | null,"id": string,"offer_round": number,"paid_at": string | null,"paid_out_at": string | null,"pay_by": string,"payout_amount": number,"paystack_access_code": string | null,"paystack_authorization_url": string | null,"paystack_reference": string | null,"refunded_at": string | null,"seller_id": string,"status": string
+                    "amount": number,"auction_id": string,"buyer_id": string,"commission": number,"created_at": string,"dispute_reason": string | null,"handed_over_at": string | null,"handover_attempts": number,"handover_code_hash": string | null,"handover_window_started_at": string | null,"id": string,"offer_round": number,"paid_at": string | null,"paid_out_at": string | null,"pay_by": string,"payout_amount": number,"paystack_access_code": string | null,"paystack_authorization_url": string | null,"paystack_reference": string | null,"refunded_at": string | null,"seller_id": string,"status": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "amount": number,"auction_id": string,"buyer_id": string,"commission": number,"created_at"?: string,"dispute_reason"?: string | null,"handed_over_at"?: string | null,"handover_attempts"?: number,"handover_code_hash"?: string | null,"id"?: string,"offer_round"?: number,"paid_at"?: string | null,"paid_out_at"?: string | null,"pay_by": string,"payout_amount": number,"paystack_access_code"?: string | null,"paystack_authorization_url"?: string | null,"paystack_reference"?: string | null,"refunded_at"?: string | null,"seller_id": string,"status"?: string
+                    "amount": number,"auction_id": string,"buyer_id": string,"commission": number,"created_at"?: string,"dispute_reason"?: string | null,"handed_over_at"?: string | null,"handover_attempts"?: number,"handover_code_hash"?: string | null,"handover_window_started_at"?: string | null,"id"?: string,"offer_round"?: number,"paid_at"?: string | null,"paid_out_at"?: string | null,"pay_by": string,"payout_amount": number,"paystack_access_code"?: string | null,"paystack_authorization_url"?: string | null,"paystack_reference"?: string | null,"refunded_at"?: string | null,"seller_id": string,"status"?: string
                   }
                   Update: {
-                    "amount"?: number,"auction_id"?: string,"buyer_id"?: string,"commission"?: number,"created_at"?: string,"dispute_reason"?: string | null,"handed_over_at"?: string | null,"handover_attempts"?: number,"handover_code_hash"?: string | null,"id"?: string,"offer_round"?: number,"paid_at"?: string | null,"paid_out_at"?: string | null,"pay_by"?: string,"payout_amount"?: number,"paystack_access_code"?: string | null,"paystack_authorization_url"?: string | null,"paystack_reference"?: string | null,"refunded_at"?: string | null,"seller_id"?: string,"status"?: string
+                    "amount"?: number,"auction_id"?: string,"buyer_id"?: string,"commission"?: number,"created_at"?: string,"dispute_reason"?: string | null,"handed_over_at"?: string | null,"handover_attempts"?: number,"handover_code_hash"?: string | null,"handover_window_started_at"?: string | null,"id"?: string,"offer_round"?: number,"paid_at"?: string | null,"paid_out_at"?: string | null,"pay_by"?: string,"payout_amount"?: number,"paystack_access_code"?: string | null,"paystack_authorization_url"?: string | null,"paystack_reference"?: string | null,"refunded_at"?: string | null,"seller_id"?: string,"status"?: string
                   }
                   Relationships: [
                     {
@@ -317,6 +343,16 @@ isOneToOne: true
 "admin_create_drop":
 { Args: { "p_close_interval_seconds"?: number,"p_first_close_at": string,"p_max_lots"?: number,"p_opens_at": string,"p_title": string }; Returns: string
                            },
+"admin_drop_lots":
+{ Args: { "p_drop_id": string }; Returns: {
+              "area": string,"bid_count": number,"closed_at": string,"current_bid": number,"ends_at": string,"id": string,"outcome": string,"seller_name": string,"start_price": number,"title": string
+            }[]
+                           },
+"admin_drops_calendar":
+{ Args: { "p_days"?: number }; Returns: {
+              "first_close_at": string,"id": string,"live_bids": number,"lots": number,"max_lots": number,"opens_at": string,"status": string,"title": string
+            }[]
+                           },
 "admin_overview":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -349,14 +385,14 @@ isOneToOne: true
 { Args: { "p_limit"?: number }; Returns: number
                            },
 "confirm_handover":
-{ Args: { "p_code": string,"p_order_id": string }; Returns: string
+{ Args: { "p_code": string,"p_order_id": string }; Returns: Json
                            },
 "create_listing":
 { Args: { "p_area": string,"p_category": string,"p_condition": string,"p_description": string,"p_drop_id": string,"p_start_price": number,"p_title": string }; Returns: string
                            },
 "current_drops":
 { Args: { "p_limit"?: number }; Returns: {
-              "accepting_listings": boolean,"close_interval_seconds": number,"first_close_at": string,"id": string,"last_close_at": string,"lot_count": number,"opens_at": string,"server_now": string,"title": string
+              "accepting_listings": boolean,"close_interval_seconds": number,"first_close_at": string,"id": string,"last_close_at": string,"lot_count": number,"opens_at": string,"reminded": boolean,"server_now": string,"title": string
             }[]
                            },
 "decline_second_chance":
@@ -378,6 +414,11 @@ isOneToOne: true
                            },
 "get_lot":
 { Args: { "p_auction_id": string }; Returns: Json
+                           },
+"listable_drops":
+{ Args: { "p_limit"?: number }; Returns: {
+              "id": string,"lot_count": number,"opens_at": string,"title": string
+            }[]
                            },
 "log_paystack_event":
 { Args: { "p_data_id": string,"p_event": string,"p_payload": Json,"p_reference": string }; Returns: boolean
@@ -435,8 +476,14 @@ isOneToOne: true
 "save_seller_bank":
 { Args: { "p_account_name": string,"p_account_number": string,"p_bank_code": string,"p_bank_name": string,"p_recipient_code": string,"p_seller_id": string }; Returns: undefined
                            },
+"send_drop_reminders":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "server_time":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"set_drop_reminder":
+{ Args: { "p_drop_id": string,"p_on"?: boolean }; Returns: undefined
                            },
 "set_order_checkout":
 { Args: { "p_access_code": string,"p_authorization_url": string,"p_order_id": string }; Returns: undefined
