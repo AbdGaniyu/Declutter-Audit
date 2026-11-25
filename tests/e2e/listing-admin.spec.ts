@@ -25,7 +25,8 @@ test('seller lists an item with photos into an upcoming drop', async ({ page }) 
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
 
   // Step 3: drop. Then review.
-  await page.getByRole('radio', { name: new RegExp(dropTitle) }).check();
+  await page.getByText(dropTitle).click(); // tap the drop card
+  await expect(page.getByRole('radio', { name: new RegExp(dropTitle) })).toBeChecked();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Check and list' })).toBeVisible();
   await page.getByRole('button', { name: 'List my lot' }).click();
@@ -55,7 +56,8 @@ test('admin creates a drop; non-admins cannot open the panel', async ({ page }) 
 
   await db(`update public.profiles set is_admin = true where phone = '2348000000002'`);
   await page.goto('/admin');
-  await expect(page.getByRole('heading', { name: 'Admin' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Drops' })).toBeVisible();
+  await page.getByRole('button', { name: 'New drop' }).click();
   const title = `E2E admin drop ${Date.now()}`;
   await page.getByLabel('New drop title').fill(title);
   await page.getByLabel('Opens (Lagos time)').fill('2030-01-05T19:00');
