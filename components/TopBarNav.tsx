@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogoMark } from '@/components/Glass';
 import { NotificationBell } from '@/components/NotificationBell';
+import { SearchButton } from '@/components/SearchOverlay';
 import { useTopBarBack } from '@/components/TopBarContext';
 import { iconProps } from '@/components/icons';
 
@@ -69,6 +70,7 @@ export function TopBarNav({ userId, isAdmin }: { userId: string | null; isAdmin:
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
+            <SearchButton />
             {userId ? (
               <>
                 <NotificationBell userId={userId} />
