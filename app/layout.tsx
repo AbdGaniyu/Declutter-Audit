@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ServiceWorker />
         <TopBarProvider>
           <TopBar />
-          <main className="mx-auto w-full max-w-content px-4 pb-28 pt-4 md:px-8 md:pt-6">{children}</main>
+          <main className="mx-auto w-full max-w-content px-4 pb-28 pt-6 md:px-8 md:pt-12">{children}</main>
         </TopBarProvider>
       </body>
     </html>
