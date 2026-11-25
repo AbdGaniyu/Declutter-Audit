@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyBroadcast, type Lot } from '@/lib/lot';
 
 const base: Lot = {
-  id: 'a', drop_id: 'd', drop_title: 'Drop', title: 'Fan', description: '', condition: 'good',
+  id: 'a', drop_id: 'd', drop_title: 'Drop', drop_number: 14, lot_no: 7, drop_lot_count: 38, title: 'Fan', description: '', condition: 'good',
   category: 'Home', area: 'Yaba', start_price: 1_500_000, step: 50_000, current_bid: 1_500_000,
   bid_count: 1, min_next: 1_550_000, starts_at: '2026-11-19T18:00:00Z', ends_at: '2026-11-19T18:30:00Z',
   closed_at: null, outcome: null, leader_no: 1, seller_name: 'Ada', seller_verified: true, seller_since: null, is_seller: false,
