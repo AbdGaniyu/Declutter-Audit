@@ -60,7 +60,8 @@ export function SlideToBid({
   useEffect(() => () => void anim.current?.stop(), []);
 
   const bid = () => {
-    if (state !== 'ready') return;
+    // Paused mid-drag (connection dropped, lot ended): don't bid, and don't strand the thumb.
+    if (state !== 'ready') return springTo(0);
     springTo(1, 0, SPRINGS.calm);
     onBid();
   };
