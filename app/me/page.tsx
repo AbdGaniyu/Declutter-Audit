@@ -19,9 +19,9 @@ export default async function MePage() {
   ]);
 
   const links = [
-    { href: '/me/orders', label: 'My wins & orders', note: toPay ? `${toPay} to pay` : null },
+    { href: '/me/orders?view=buying', label: 'Orders', note: toPay ? `${toPay} to pay` : null },
     { href: '/me/bids', label: 'My bids' },
-    { href: '/me/sales', label: 'My sales & lots' },
+    { href: '/me/orders?view=selling', label: 'Selling' },
     { href: '/me/bank', label: 'Payout bank account' },
     { href: '/me/notifications', label: 'Notifications' },
   ];

@@ -75,7 +75,7 @@ export function BidPanel({
       {/* Grabber: mobile only. */}
       <button type="button" aria-expanded={expanded} aria-label={expanded ? 'Show less' : 'Show bid amounts and history'}
         onClick={() => setExpanded((e) => !e)}
-        className="mx-auto mb-1 flex h-6 w-16 items-center justify-center md:hidden">
+        className="mx-auto -mt-2 flex h-11 w-24 items-center justify-center md:hidden">
         <span className="h-1 w-8 rounded-pill [background:color-mix(in_srgb,var(--secondary)_45%,transparent)]" />
       </button>
 
