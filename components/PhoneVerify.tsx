@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/Button';
+import { CodeInput } from '@/components/CodeInput';
 import { ErrorText, Input, Label, Select } from '@/components/Field';
 import { LAGOS_AREAS } from '@/lib/areas';
-import { normalizeNigerianPhone } from '@/lib/phone';
+import { maskPhone, normalizeNigerianPhone } from '@/lib/phone';
 import { getBrowserSupabase } from '@/lib/supabase/client';
 
 type Step = 'phone' | 'code' | 'profile';
@@ -71,7 +72,7 @@ export function PhoneVerify({ onDone }: { onDone: () => void }) {
             value={phone} onChange={(e) => setPhone(e.target.value)} required />
         </div>
         <ErrorText>{error}</ErrorText>
-        <Button type="submit" block busy={busy}>Send code</Button>
+        <Button type="submit" block tall busy={busy}>Send code</Button>
       </form>
     );
   }
@@ -79,23 +80,22 @@ export function PhoneVerify({ onDone }: { onDone: () => void }) {
   if (step === 'code') {
     return (
       <form onSubmit={verify} className="space-y-4">
-        <p className="text-body text-ink-muted">We sent a 6-digit code to {phone}.</p>
-        <div>
-          <Label htmlFor="code">6-digit code</Label>
-          <Input id="code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} pattern="\d{6}"
-            className="font-num text-heading tracking-[0.3em]"
-            value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} required />
-        </div>
+        <p className="text-body text-secondary">
+          Enter the 6-digit code we sent to <span className="tnum font-semibold text-label">{maskPhone(phone)}</span>.{' '}
+          <button type="button" className="font-semibold text-label underline underline-offset-2" onClick={() => { setCode(''); setStep('phone'); }}>
+            Change number
+          </button>
+        </p>
+        <CodeInput value={code} onChange={setCode} label="6-digit code" idPrefix="otp" />
         <ErrorText>{error}</ErrorText>
-        <Button type="submit" block busy={busy} disabled={code.length !== 6}>Verify</Button>
-        <Button type="button" variant="link" block onClick={() => setStep('phone')}>Use a different number</Button>
+        <Button type="submit" block tall busy={busy} disabled={code.length !== 6}>Verify</Button>
       </form>
     );
   }
 
   return (
     <form onSubmit={saveProfile} className="space-y-4">
-      <p className="text-body text-ink-muted">Last step. Buyers see your first name if you sell.</p>
+      <p className="text-body text-secondary">Last step. Buyers see your first name if you sell.</p>
       <div>
         <Label htmlFor="name">First name</Label>
         <Input id="name" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} required />
@@ -108,7 +108,7 @@ export function PhoneVerify({ onDone }: { onDone: () => void }) {
         </Select>
       </div>
       <ErrorText>{error}</ErrorText>
-      <Button type="submit" block busy={busy}>Continue</Button>
+      <Button type="submit" block tall busy={busy}>Continue</Button>
     </form>
   );
 }

@@ -3,6 +3,10 @@ export type Lot = {
   id: string;
   drop_id: string;
   drop_title: string;
+  drop_number: number;
+  /** Position among the drop's non-cancelled lots, 1-based ("Lot 07 of 38"). */
+  lot_no: number;
+  drop_lot_count: number;
   title: string;
   description: string;
   condition: string;

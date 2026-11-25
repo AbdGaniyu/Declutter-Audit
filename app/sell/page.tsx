@@ -18,17 +18,17 @@ export default async function SellPage() {
   const open = drops ?? [];
 
   return (
-    <div className="mx-auto max-w-lot space-y-4">
+    <div className="mx-auto max-w-lot space-y-5">
       {!bank && (
-        <p className="rounded-card border border-line bg-surface p-3 text-body">
+        <p className="squircle rounded-group bg-surface p-3 text-body">
           Add your bank account before your lot sells, so we can pay you after pickup.{' '}
-          <Link href="/me/bank" className="font-semibold text-focus">Add bank account</Link>
+          <Link href="/me/bank" className="font-semibold text-label underline underline-offset-2">Add bank account</Link>
         </p>
       )}
       {open.length === 0 ? (
-        <div className="rounded-card bg-surface p-4 shadow-elev">
-          <h1 className="font-display text-display">Sell an item</h1>
-          <p className="mt-1 text-ink-muted">No drops are taking listings right now. Check back soon.</p>
+        <div className="squircle rounded-group bg-surface p-4">
+          <h1 className="text-title-sm md:text-title">Sell an item</h1>
+          <p className="mt-1 text-secondary">No drops are taking listings right now. Check back soon.</p>
         </div>
       ) : (
         <SellFlow

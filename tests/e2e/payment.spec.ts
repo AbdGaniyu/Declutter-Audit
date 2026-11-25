@@ -28,16 +28,16 @@ test('win → pay → handover code → payout, with webhook replay', async ({ b
 
   // Buyer bids, then waits for the close (cron runs every 5s; soft close adds 30s).
   await buyer.goto(`/lot/${lot!.id}`);
-  await buyer.getByRole('button', { name: /^Bid ₦/ }).last().click();
-  await buyer.getByRole('dialog', { name: 'Place your bid' }).getByRole('button', { name: 'Bid ₦25,000' }).click();
-  await expect(buyer.getByText(/You're winning at/)).toBeVisible();
-  // Won banner counts down to pay_by and links straight to the pay screen.
-  await expect(buyer.getByText(/You won! Pay within/)).toBeVisible({ timeout: 60_000 });
+  await buyer.getByRole('button', { name: 'Bid ₦25,000' }).press('Enter');
+  await expect(buyer.getByRole('status').getByText("You're the top bidder")).toBeVisible();
+  // "You won this lot" with a Pay within mm:ss button that counts down to pay_by.
+  await expect(buyer.getByText('You won this lot')).toBeVisible({ timeout: 60_000 });
 
   // Pay through the (mock) Paystack checkout.
-  await buyer.getByRole('link', { name: 'Pay now' }).click();
+  await buyer.getByRole('link', { name: /Pay within/ }).click();
+  await expect(buyer.getByRole('heading', { name: 'Pay for your lot' })).toBeVisible();
   await expect(buyer.getByText('Your money is held until you collect the item')).toBeVisible();
-  await buyer.getByRole('button', { name: 'Pay now' }).click();
+  await buyer.getByRole('button', { name: 'Pay ₦25,000' }).click();
   await buyer.waitForURL(/localhost:4010\/checkout\//);
   await buyer.getByRole('button', { name: 'Pay now' }).click();
   await buyer.waitForURL(/\/me\/orders\/.+paid=1/);
@@ -65,8 +65,8 @@ test('win → pay → handover code → payout, with webhook replay', async ({ b
   await seller.getByRole('button', { name: /Verify and save|Update account/ }).click();
   await expect(seller.getByText('Saved: ADAEZE TEST OKAFOR')).toBeVisible();
 
-  await seller.goto('/me/sales');
-  await expect(seller.getByRole('heading', { name: 'Ready for pickup' })).toBeVisible();
+  await seller.goto('/me/sales'); // redirects to Orders › Selling
+  await expect(seller.getByRole('tab', { name: /Ready for pickup/ })).toHaveAttribute('aria-selected', 'true');
   const card = seller.getByRole('article', { name: title });
   const firstBox = card.getByLabel("Buyer's handover code digit 1");
   await firstBox.fill(code === '000000' ? '111111' : '000000'); // fills all six boxes

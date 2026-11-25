@@ -3,11 +3,11 @@ import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes 
 import { iconProps } from '@/components/icons';
 
 const base =
-  'w-full min-h-11 rounded-card border border-line bg-surface px-3 py-2 text-body text-ink placeholder:text-ink-muted focus:border-focus';
+  'squircle w-full min-h-12 rounded-control bg-surface px-4 py-3 text-body text-label placeholder:text-secondary outline-none focus:shadow-[0_0_0_2px_var(--label)]';
 
 export function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1 block text-label uppercase text-ink-muted">
+    <label htmlFor={htmlFor} className="mb-2 block text-subhead font-semibold text-label">
       {children}
     </label>
   );
@@ -25,17 +25,17 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={`${base} ${props.className ?? ''}`} />;
 }
 
-/** Errors: --live-soft panel with an icon, text stays --ink for contrast. */
+/** Errors: a --fill panel with an icon. Monochrome: crimson is only for ending soon and the bid. */
 export function ErrorText({ children }: { children: React.ReactNode }) {
   if (!children) return null;
   return (
-    <p role="alert" className="mt-2 flex items-start gap-2 rounded-card bg-live-soft px-3 py-2 text-body text-ink">
-      <CircleAlert {...iconProps} size={18} className="mt-0.5 shrink-0 text-live" />
+    <p role="alert" className="squircle mt-2 flex items-start gap-2 rounded-control bg-fill px-4 py-3 text-subhead text-label">
+      <CircleAlert {...iconProps} size={18} className="mt-0.5 shrink-0" />
       <span>{children}</span>
     </p>
   );
 }
 
 export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-card bg-surface p-4 shadow-elev ${className}`}>{children}</div>;
+  return <div className={`squircle rounded-group bg-surface p-4 ${className}`}>{children}</div>;
 }

@@ -11,8 +11,9 @@ export default async function HomePage() {
     supabase.auth.getUser(),
   ]);
   const all: DropInfo[] = (drops ?? []).map((d) => ({
-    id: d.id, title: d.title, opens_at: d.opens_at, last_close_at: d.last_close_at,
-    lot_count: d.lot_count, reminded: d.reminded,
+    id: d.id, number: d.number, title: d.title, opens_at: d.opens_at, last_close_at: d.last_close_at,
+    close_interval_seconds: d.close_interval_seconds, lot_count: d.lot_count, areas: d.areas ?? [],
+    total_bids: d.total_bids, reminded: d.reminded,
   }));
   const [hero, ...upcoming] = all;
 
@@ -20,7 +21,7 @@ export default async function HomePage() {
   if (hero) {
     const { data } = await supabase
       .from('auctions')
-      .select('id, title, area, condition, start_price, current_bid, bid_count, starts_at, ends_at, closed_at, outcome, auction_photos(storage_path, position)')
+      .select('id, title, area, condition, category, start_price, current_bid, bid_count, starts_at, ends_at, closed_at, outcome, auction_photos(storage_path, position)')
       .eq('drop_id', hero.id)
       .or('outcome.is.null,outcome.neq.cancelled')
       .order('ends_at'); // sorted by close time

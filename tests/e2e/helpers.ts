@@ -45,7 +45,7 @@ export async function signIn(page: Page, localPhone: string, name: string, next 
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel('Phone number').fill(localPhone);
   // GoTrue throttles OTP requests per phone; tests reuse phones, so wait it out.
-  const codeField = page.getByLabel('6-digit code');
+  const codeField = page.getByLabel('6-digit code digit 1');
   for (let attempt = 0; attempt < 5; attempt++) {
     await page.getByRole('button', { name: 'Send code' }).click();
     const throttled = page.getByText(/only request this after/);

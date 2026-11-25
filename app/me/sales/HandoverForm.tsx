@@ -39,7 +39,7 @@ export function HandoverForm({ orderId }: { orderId: string }) {
       <CodeInput value={code} onChange={setCode} label="Buyer's handover code" idPrefix={`code-${orderId}`} />
       <ErrorText>{error}</ErrorText>
       <Button type="submit" block tall busy={busy} disabled={code.length !== 6}>Confirm handover</Button>
-      <p className="text-body text-ink-muted">Ask for the code only when you hand over the item.</p>
+      <p className="text-footnote text-secondary">Five tries an hour keeps the money safe.</p>
     </form>
   );
 }

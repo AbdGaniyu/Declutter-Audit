@@ -6,14 +6,16 @@ Read **CLAUDE.md** (product rules) and **DESIGN.md** (UI tokens) first.
 
 ## Quick start
 
+> **Use the project's Supabase CLI (`npx supabase …`), not a global install.** The repo pins CLI v3.x in `package.json`. An older global CLI (e.g. Homebrew v2.x) starts Auth with phone sign-in disabled ("Unsupported phone provider") and builds a `storage` schema that newer Storage images can't upload into. If the stack was ever started with another CLI version, recreate it: `npx supabase stop --no-backup && npx supabase start`.
+
 ```bash
 npm install
-cp .env.example .env.local                       # fill NEXT_PUBLIC_SUPABASE_ANON_KEY from `supabase start`
+cp .env.example .env.local                       # fill NEXT_PUBLIC_SUPABASE_ANON_KEY from `npx supabase start`
 cp supabase/functions/.env.example supabase/functions/.env
 npx web-push generate-vapid-keys                 # put keys in functions/.env, public key in .env.local
-supabase start                                   # Postgres, Auth, Realtime, Storage, Edge Runtime
-supabase db reset                                # migrations + seed (a week of 7pm drops)
-supabase functions serve --env-file supabase/functions/.env
+npx supabase start                               # Postgres, Auth, Realtime, Storage, Edge Runtime
+npx supabase db reset                            # migrations + seed (a week of 7pm drops)
+npx supabase functions serve --env-file supabase/functions/.env
 npm run mock:paystack                            # optional: local Paystack stand-in on :4010
 npm run dev
 ```
@@ -34,6 +36,8 @@ update public.profiles set is_admin = true where phone = '2348000000001';
 | `npm run test:db` | pgTAP (`supabase test db`): bidding rules, soft close, RLS, listing, closing idempotency, payments, handover/payouts, strikes, hardening |
 | `npm run test:race` | 50 concurrent bids: one accepted per price level, `current_bid` = max accepted, nothing accepted after `ends_at` |
 | `npm run test:e2e` | Playwright: live bidding between two users, listing with photo upload, admin, and the full win → pay → handover → payout loop against the mock Paystack |
+
+Before the first e2e run, install the browser: `npx playwright install chromium`.
 
 The e2e payment test needs the Edge Functions running with `PAYSTACK_API_URL` pointing at the mock (`http://host.docker.internal:4010` from the edge-runtime container).
 
@@ -71,20 +75,24 @@ The e2e payment test needs the Edge Functions running with `PAYSTACK_API_URL` po
 5. **Vercel:** set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `NEXT_PUBLIC_VAPID_PUBLIC_KEY` only. No secret key ever goes to Next.js.
 6. **Settings** live in `private.settings` (commission, pay window, grace, strikes, drop hour). Change them with a migration.
 
-## How the UI applies DESIGN.md
+## How the UI applies DESIGN.md (v2, "Liquid Glass")
 
-- **Tokens:** colors, type and shape are in `app/globals.css` and `tailwind.config.ts`. Fonts are self-hosted with `next/font`. Icons are Lucide at 1.75 stroke.
-- **Contrast:** `--live`, `--winning`, `--outbid` and `--ended` don't reach WCAG AA (4.5:1) as small text on white. They're used for fills, icons, dots and the large countdown and price numbers (which only need 3:1). Small status text stays `--ink` on the matching `-soft` background, with an icon so status never relies on color.
-- **Lot page order:** the price and countdown block sits right under the status banner, above the title. Following the key-screens order literally pushed the clock below the sticky bar on a 360×780 phone, which breaks principle #1 ("the clock is the hero").
-- **Bid sheet shake:** principle #5 says "never shake", but the bid sheet spec asks for one gentle shake on rejection. It shakes once (4px, 280ms), and not at all with reduced motion.
-- **Sell flow:** "3 steps" is read as Photos → Details → Drop, followed by a Review screen.
-- **"+30s" pill:** shown whenever a bid extends `ends_at`, matching the copy in the doc, even when the extension is shorter than 30s.
+- **Tokens:** light and dark values live in `app/globals.css` (dark follows `prefers-color-scheme`) and are mapped in `tailwind.config.ts`. Type is SF Pro on Apple devices and self-hosted Inter elsewhere. Icons are Lucide at 1.75 stroke. Reference mockups: `docs/design/v2-screens.pdf`.
+- **Glass** (`.glass-chip`, `.glass-nav`, `.glass-dock`) is only on the top bar, the mobile tab bar, the bid dock, the active filter pill and photo controls. It falls back to solid with `prefers-reduced-transparency` and gains a rim with `prefers-contrast: more`.
+- **One accent:** crimson (`--accent`) is only on slide to bid, "Bid ₦X" shortcuts and countdowns at 60 seconds or less. Every other status is monochrome with an icon or a word.
+- **Motion:** `lib/spring.ts` solves the calm (1.0 · 0.35s) and flick (0.77 · 0.32s) springs in closed form. CSS transitions use the same curves via generated `linear()` easings. Reduced motion jumps or cross-fades.
+- **Slide to bid** (`components/SlideToBid.tsx`, logic in `lib/slide.ts`) is one focusable button: drag past 85%, flick, tap, or press Enter or Space. It only changes how a bid is triggered. Every bid still goes through `place_bid`.
+- **Quick bid chips** are +1, +2 and +5 of the lot's stored `step` (`lib/bidding.ts`). The first chip always equals the server's `min_next`.
+- **Lot page:** one bid panel renders as a glass dock with a drag-up drawer on phones and as a sticky floating panel on desktop, so there's only ever one slider in the page.
+- **Orders:** `/me/orders` has Buying and Selling. Selling has the seller segments (Awaiting payment, Ready for pickup, Paid out), and `/me/sales` redirects there.
+- **Admin:** `/admin` (week calendar of drops), `/admin/lots`, `/admin/users`, `/admin/disputes` and `/admin/strikes`, behind an `is_admin` check in `app/admin/layout.tsx`.
+- **Not decided yet:** the app name and logo. The nav (`LogoMark`) and the PWA icons (`public/icons/icon.svg`, PNGs rendered from it) use an interim monochrome ring mark. Swap both when the real logo exists.
 
 ## Decisions and additions beyond CLAUDE.md
 
 - **Broadcast payload** sends `leader_no` rather than `leader_id`, to honour the masking rule.
 - **`place_bid` reasons** add `not_authenticated`, `not_verified`, `invalid_amount` (whole naira, ≤ ₦50m), `not_found`, `cancelled` and `already_leading` (the leader can't raise their own bid) to the spec'd five.
-- **Schema additions:** `profiles.is_admin`; `drops.max_lots`; `auctions.slot` and `relisted_from`; `orders.offer_round`, `handover_attempts`, `dispute_reason`, `refunded_at`, checkout fields and a `declined` status; `payouts.failure_reason` and `attempts`; `notifications.pushed_at`; `auction_bidders` (pseudonyms); `ops_alerts`; `private.paystack_events` (webhook audit log).
+- **Schema additions:** `drops.number` (Drop No., stable once assigned); `profiles.is_admin`; `drops.max_lots`; `auctions.slot` and `relisted_from`; `orders.offer_round`, `handover_attempts`, `dispute_reason`, `refunded_at`, checkout fields and a `declined` status; `payouts.failure_reason` and `attempts`; `notifications.pushed_at`; `auction_bidders` (pseudonyms); `ops_alerts`; `private.paystack_events` (webhook audit log).
 - **Paystack needs an email:** buyers sign in by phone, so checkout uses `buyer-<uid>@BUYER_EMAIL_DOMAIN`.
 - **Handover code:** 5 wrong tries per rolling hour (from DESIGN.md), then locked until the hour is up, with an ops alert.
 - **Drop reminders:** "Remind me" saves a reminder, and a cron job notifies and pushes when the drop opens.

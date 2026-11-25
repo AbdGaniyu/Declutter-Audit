@@ -1,50 +1,56 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { formatNaira } from '@/lib/money';
+import { SPRINGS, settleTime, springEasing } from '@/lib/spring';
 
-/** Static price in the numeric font with tabular figures. */
+/** Static price with tabular figures. */
 export function Price({ kobo, className = '' }: { kobo: number | null | undefined; className?: string }) {
-  return <span className={`font-num tabular-nums ${className}`}>{formatNaira(kobo)}</span>;
+  return <span className={`tnum ${className}`}>{formatNaira(kobo)}</span>;
 }
 
-function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ROLL_MS = settleTime(SPRINGS.calm);
+const ROLL_EASE = springEasing(SPRINGS.calm, ROLL_MS);
+const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+function DigitColumn({ digit }: { digit: number }) {
+  return (
+    <span className="relative inline-block h-[1.1em] overflow-hidden align-top leading-[1.1em]" aria-hidden>
+      <span
+        className="flex flex-col motion-reduce:!transition-none"
+        style={{ transform: `translateY(${-digit * 1.1}em)`, transition: `transform ${ROLL_MS}ms ${ROLL_EASE}` }}
+      >
+        {DIGITS.map((d) => <span key={d} className="h-[1.1em]">{d}</span>)}
+      </span>
+    </span>
+  );
 }
 
 /**
- * Price that rolls up over 250ms and flashes --live-soft for 400ms when it
- * changes. With reduced motion: instant change, color flash only.
+ * DESIGN.md › Live price: each digit rolls on its own (calm) spring, and a soft
+ * sheen crosses it when the price changes. Reduced motion: instant change.
+ * Screen readers get the plain amount.
  */
 export function LivePrice({ kobo, className = '' }: { kobo: number; className?: string }) {
-  const [shown, setShown] = useState(kobo);
-  const [flashKey, setFlashKey] = useState(0);
+  const text = formatNaira(kobo);
+  const [sheenKey, setSheenKey] = useState(0);
   const prev = useRef(kobo);
-
   useEffect(() => {
-    const from = prev.current;
+    if (prev.current !== kobo) setSheenKey((k) => k + 1);
     prev.current = kobo;
-    if (from === kobo) return;
-    setFlashKey((k) => k + 1);
-    if (prefersReducedMotion() || from > kobo) {
-      setShown(kobo);
-      return;
-    }
-    const start = performance.now();
-    let raf = 0;
-    const tick = (t: number) => {
-      const p = Math.min(1, (t - start) / 250);
-      const eased = 1 - (1 - p) ** 3;
-      // Roll in whole naira so intermediate values look like real prices.
-      setShown(p === 1 ? kobo : Math.round((from + (kobo - from) * eased) / 100) * 100);
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
   }, [kobo]);
 
+  // Key digits by place from the right, so ones stay ones as the number grows.
+  const chars = [...text];
   return (
-    <span key={flashKey} className={`-mx-1 rounded-card px-1 font-num tabular-nums ${flashKey ? 'flash-live-soft' : ''} ${className}`}>
-      {formatNaira(shown)}
+    <span className={`tnum relative inline-flex overflow-hidden leading-[1.1em] ${className}`}>
+      {sheenKey > 0 && <span key={sheenKey} className="sheen-sweep pointer-events-none absolute inset-0" aria-hidden />}
+      <span className="sr-only">{text}</span>
+      {chars.map((c, i) => {
+        const place = chars.length - i;
+        return /\d/.test(c)
+          ? <DigitColumn key={`d${place}`} digit={Number(c)} />
+          : <span key={`s${place}`} aria-hidden>{c}</span>;
+      })}
     </span>
   );
 }

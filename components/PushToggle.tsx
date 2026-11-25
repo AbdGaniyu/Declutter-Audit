@@ -16,10 +16,10 @@ export function PushToggle() {
   }, []);
 
   if (state === 'unsupported') {
-    return <p className="text-body text-ink-muted">Alerts aren't supported in this browser. Add the app to your home screen to get them.</p>;
+    return <p className="text-body text-secondary">Alerts aren&apos;t supported in this browser. Add the app to your home screen to get them.</p>;
   }
   if (state === 'denied') {
-    return <p className="text-body text-ink-muted">Notifications are blocked. Allow them in your browser settings to get outbid alerts.</p>;
+    return <p className="text-body text-secondary">Notifications are blocked. Allow them in your browser settings to get outbid alerts.</p>;
   }
   return state === 'on' ? (
     <Button variant="secondary" onClick={async () => { setState('busy'); await disablePush(); setState('off'); }}>

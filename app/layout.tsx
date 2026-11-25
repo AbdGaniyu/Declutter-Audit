@@ -1,15 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Manrope, Saira_Semi_Condensed } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { Header } from '@/components/Header';
+import { TopBar } from '@/components/TopBar';
+import { TopBarProvider } from '@/components/TopBarContext';
 import { ClockSync } from '@/components/ClockSync';
 import { ServiceWorker } from '@/components/ServiceWorker';
 
-// Self-hosted at build time by next/font: no requests to Google from the browser.
-const display = Bricolage_Grotesque({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-display', display: 'swap' });
-const body = Manrope({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-body', display: 'swap' });
-// latin-ext carries the ₦ sign.
-const num = Saira_Semi_Condensed({ subsets: ['latin', 'latin-ext'], weight: ['500', '600'], variable: '--font-num', display: 'swap' });
+// Inter is the fallback after SF Pro (DESIGN.md › Typography). Self-hosted at build
+// time by next/font: no requests to Google from the browser. latin-ext carries ₦.
+const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Declutter Auction',
@@ -22,17 +21,22 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#FAF7F2',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F5F5F7' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-NG" className={`${display.variable} ${body.variable} ${num.variable}`}>
-      <body className="min-h-dvh bg-bg font-sans text-body text-ink antialiased">
+    <html lang="en-NG" className={inter.variable}>
+      <body className="min-h-dvh bg-bg font-sans text-body text-label antialiased">
         <ClockSync />
         <ServiceWorker />
-        <Header />
-        <main className="mx-auto w-full max-w-grid px-4 pb-28 pt-4">{children}</main>
+        <TopBarProvider>
+          <TopBar />
+          <main className="mx-auto w-full max-w-content px-4 pb-28 pt-6 md:px-8 md:pt-12">{children}</main>
+        </TopBarProvider>
       </body>
     </html>
   );

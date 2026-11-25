@@ -36,11 +36,11 @@ export function NotificationBell({ userId }: { userId: string }) {
   }, [userId]);
 
   return (
-    <Link href="/me/notifications" className="relative inline-flex h-11 w-11 items-center justify-center rounded-pill text-ink"
+    <Link href="/me/notifications" className="relative inline-flex h-11 w-11 items-center justify-center rounded-pill text-label pressable"
       aria-label={`Notifications (${unread} unread)`}>
       <Bell {...iconProps} size={20} />
       {unread > 0 && (
-        <span className="absolute right-1 top-1 min-w-4 rounded-pill bg-ink px-1 text-center font-num text-[11px] leading-4 text-white">
+        <span className="absolute right-1 top-1 min-w-4 rounded-pill bg-label px-1 text-center tnum text-[11px] font-semibold leading-4 text-on-label">
           {unread > 9 ? '9+' : unread}
         </span>
       )}

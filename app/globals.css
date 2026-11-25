@@ -2,48 +2,157 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tokens from DESIGN.md. Light only: dark mode is v2. */
+/* Design system v2 tokens (DESIGN.md › Colour tokens). Dark follows the system. */
 :root {
-  --bg: #faf7f2;
+  --bg: #f5f5f7;
   --surface: #ffffff;
-  --ink: #14110f;
-  --ink-muted: #6b645c;
-  --line: #e7e1d8;
-  --live: #e4572e;
-  --live-soft: #fde9e2;
-  --winning: #1f8a4c;
-  --winning-soft: #e3f4ea;
-  --outbid: #c98a00;
-  --outbid-soft: #fdf3dc;
-  --ended: #8a847c;
-  --focus: #2e6be4;
-  --shadow: 0 1px 2px rgba(20, 17, 15, 0.06), 0 4px 16px rgba(20, 17, 15, 0.06);
-  color-scheme: light;
+  --label: #1d1d1f;
+  --secondary: #6e6e73;
+  --fill: rgba(120, 120, 128, 0.12);
+  --hairline: rgba(60, 60, 67, 0.14);
+  --accent: #d70015;
+  --accent-text: #d70015;
+  --focus: #0071e3;
+  --on-label: #ffffff; /* text on a --label fill (primary buttons) */
+
+  /* Glass (DESIGN.md › Material) */
+  --glass-fill: rgba(255, 255, 255, 0.58);
+  --glass-edge: rgba(255, 255, 255, 1);
+  --glass-sheen: rgba(255, 255, 255, 0.45);
+  --float-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --label: #f5f5f7;
+    --secondary: #a1a1a6;
+    --fill: rgba(120, 120, 128, 0.24);
+    --hairline: rgba(84, 84, 88, 0.6);
+    --accent-text: #ff453a;
+    --focus: #0a84ff;
+    --on-label: #000000;
+
+    --glass-fill: rgba(44, 44, 48, 0.55);
+    --glass-edge: rgba(255, 255, 255, 0.12);
+    --glass-sheen: rgba(255, 255, 255, 0.06);
+    --float-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
 }
 
 html,
 body {
   background: var(--bg);
-  color: var(--ink);
+  color: var(--label);
 }
 
 body {
   -webkit-tap-highlight-color: transparent;
+  font-feature-settings: 'cv11', 'ss01'; /* Inter: single-storey a off, open digits */
 }
 
-/* Every focus state is visible: --focus 2px ring. */
+/* Every focus state is visible: 2px --focus ring, 2px offset. */
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* --- Motion (DESIGN.md › Motion). Reduced motion keeps only the color flash. --- */
-@keyframes flash-live-soft {
-  0% { background-color: var(--live-soft); }
+@layer utilities {
+  /* Numerals always tabular (DESIGN.md › Typography). */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Continuous corners where supported; rounded elsewhere. */
+  @supports (corner-shape: squircle) {
+    .squircle {
+      corner-shape: squircle;
+    }
+  }
+
+  /* 0.5px inset hairline between list rows. */
+  .hairline-b {
+    box-shadow: inset 0 -0.5px 0 var(--hairline);
+  }
+}
+
+@layer components {
+  /* Glass: thickness follows size. Never on cards, lists or text blocks. */
+  .glass-chip,
+  .glass-nav,
+  .glass-dock {
+    background-color: var(--glass-fill);
+    background-image: linear-gradient(to bottom, var(--glass-sheen), transparent 46%);
+    box-shadow: inset 0 1px 0 var(--glass-edge), var(--float-shadow);
+  }
+  .glass-chip {
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
+  }
+  .glass-nav {
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+  .glass-dock {
+    -webkit-backdrop-filter: blur(36px) saturate(180%);
+    backdrop-filter: blur(36px) saturate(180%);
+  }
+
+  /* Press: scale 0.97 in 100ms, spring back. */
+  .pressable {
+    transition: transform 350ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  .pressable:active:not(:disabled) {
+    transform: scale(0.97);
+    transition-duration: 100ms;
+  }
+}
+
+/* Reduced transparency → solid. More contrast → solid + 1.5px rim. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-chip,
+  .glass-nav,
+  .glass-dock {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass-chip,
+  .glass-nav,
+  .glass-dock {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--label) 30%, transparent), var(--float-shadow);
+  }
+}
+
+/* --- Motion (DESIGN.md › Motion). CSS fallbacks; springs live in lib/spring.ts. --- */
+@keyframes flash-fill {
+  0% { background-color: var(--fill); }
   100% { background-color: transparent; }
 }
-.flash-live-soft {
-  animation: flash-live-soft 400ms ease-out;
+.flash-fill {
+  animation: flash-fill 400ms ease-out;
+}
+
+/* A soft sheen crossing the panel when the price changes. */
+@keyframes sheen-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+.sheen-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, var(--glass-sheen) 50%, transparent 70%);
+  animation: sheen-sweep 700ms cubic-bezier(0.2, 0.9, 0.3, 1) 1;
 }
 
 @keyframes slide-in-top {
@@ -51,7 +160,7 @@ body {
   to { transform: none; opacity: 1; }
 }
 .slide-in-top {
-  animation: slide-in-top 200ms ease-out;
+  animation: slide-in-top 350ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
 /* "+30s" pill: scales in, holds 1.5s, fades out. */
@@ -65,23 +174,26 @@ body {
   animation: extension-pill 1800ms ease-out forwards;
 }
 
-/* Bid sheet rejection: one gentle shake. */
-@keyframes gentle-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.gentle-shake {
-  animation: gentle-shake 280ms ease-in-out 1;
+.fade-in {
+  animation: fade-in 250ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .slide-in-top,
-  .gentle-shake {
+  .sheen-sweep::after {
     animation: none;
   }
   .extension-pill {
     animation: none;
     opacity: 1;
+  }
+  .pressable,
+  .pressable:active:not(:disabled) {
+    transform: none;
+    transition: none;
   }
 }

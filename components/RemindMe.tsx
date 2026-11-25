@@ -10,7 +10,7 @@ import { getBrowserSupabase } from '@/lib/supabase/client';
 export function RemindMe({ dropId, reminded, signedIn }: { dropId: string; reminded: boolean; signedIn: boolean }) {
   const [on, setOn] = useState(reminded);
   const [busy, setBusy] = useState(false);
-  const cls = 'inline-flex min-h-11 items-center gap-2 rounded-pill border border-line bg-surface px-4 font-semibold text-ink disabled:opacity-40';
+  const cls = 'pressable inline-flex min-h-11 shrink-0 items-center gap-2 rounded-pill bg-fill px-4 text-subhead font-semibold text-label disabled:text-secondary';
 
   if (!signedIn) {
     return <Link href="/login?next=/" className={cls}><Bell {...iconProps} size={18} /> Remind me</Link>;

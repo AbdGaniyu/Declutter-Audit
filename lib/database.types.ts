@@ -161,14 +161,14 @@ isOneToOne: false
                   ]
                 },"drops": {
                   Row: {
-                    "close_interval": string,"created_at": string,"first_close_at": string,"id": string,"max_lots": number,"opens_at": string,"status": string,"title": string
+                    "close_interval": string,"created_at": string,"first_close_at": string,"id": string,"max_lots": number,"number": number,"opens_at": string,"status": string,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "close_interval"?: string,"created_at"?: string,"first_close_at": string,"id"?: string,"max_lots"?: number,"opens_at": string,"status"?: string,"title": string
+                    "close_interval"?: string,"created_at"?: string,"first_close_at": string,"id"?: string,"max_lots"?: number,"number"?: number,"opens_at": string,"status"?: string,"title": string
                   }
                   Update: {
-                    "close_interval"?: string,"created_at"?: string,"first_close_at"?: string,"id"?: string,"max_lots"?: number,"opens_at"?: string,"status"?: string,"title"?: string
+                    "close_interval"?: string,"created_at"?: string,"first_close_at"?: string,"id"?: string,"max_lots"?: number,"number"?: number,"opens_at"?: string,"status"?: string,"title"?: string
                   }
                   Relationships: [
                     
@@ -353,6 +353,16 @@ isOneToOne: true
               "first_close_at": string,"id": string,"live_bids": number,"lots": number,"max_lots": number,"opens_at": string,"status": string,"title": string
             }[]
                            },
+"admin_drops_week":
+{ Args: { "p_week_start": string }; Returns: {
+              "day": string,"drop_id": string,"last_close_at": string,"lots": number,"number": number,"opens_at": string,"state": string,"title": string,"unsold": number
+            }[]
+                           },
+"admin_lots":
+{ Args: { "p_limit"?: number,"p_offset"?: number,"p_query": string,"p_status": string }; Returns: {
+              "area": string,"bid_count": number,"closed_at": string,"current_bid": number,"drop_id": string,"drop_number": number,"drop_title": string,"ends_at": string,"id": string,"outcome": string,"photo": string,"seller_name": string,"slot": number,"start_price": number,"starts_at": string,"title": string,"total_count": number
+            }[]
+                           },
 "admin_overview":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -365,8 +375,18 @@ isOneToOne: true
 "admin_review_user":
 { Args: { "p_reset_strikes"?: boolean,"p_user_id": string }; Returns: undefined
                            },
+"admin_strikes_week":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "bidding_suspended": boolean,"display_name": string,"lot_title": string,"phone": string,"strikes": number,"struck_at": string,"user_id": string
+            }[]
+                           },
 "admin_suspend_user":
 { Args: { "p_user_id": string }; Returns: undefined
+                           },
+"admin_users":
+{ Args: { "p_limit"?: number,"p_offset"?: number,"p_query": string }; Returns: {
+              "area": string,"bidding_suspended": boolean,"created_at": string,"display_name": string,"id": string,"is_admin": boolean,"phone": string,"strikes": number,"total_count": number
+            }[]
                            },
 "cancel_listing":
 { Args: { "p_auction_id": string }; Returns: undefined
@@ -392,7 +412,7 @@ isOneToOne: true
                            },
 "current_drops":
 { Args: { "p_limit"?: number }; Returns: {
-              "accepting_listings": boolean,"close_interval_seconds": number,"first_close_at": string,"id": string,"last_close_at": string,"lot_count": number,"opens_at": string,"reminded": boolean,"server_now": string,"title": string
+              "accepting_listings": boolean,"areas": (string)[],"close_interval_seconds": number,"first_close_at": string,"id": string,"last_close_at": string,"lot_count": number,"number": number,"opens_at": string,"reminded": boolean,"server_now": string,"title": string,"total_bids": number
             }[]
                            },
 "decline_second_chance":
@@ -434,7 +454,7 @@ isOneToOne: true
                            },
 "my_bids":
 { Args: Record<PropertyKey, never>; Returns: {
-              "area": string,"auction_id": string,"closed_at": string,"current_bid": number,"ends_at": string,"is_leading": boolean,"my_max_bid": number,"outcome": string,"title": string
+              "area": string,"auction_id": string,"closed_at": string,"current_bid": number,"ends_at": string,"is_leading": boolean,"min_next": number,"my_max_bid": number,"outcome": string,"photo": string,"starts_at": string,"title": string
             }[]
                            },
 "my_listings":
@@ -475,6 +495,11 @@ isOneToOne: true
                            },
 "save_seller_bank":
 { Args: { "p_account_name": string,"p_account_number": string,"p_bank_code": string,"p_bank_name": string,"p_recipient_code": string,"p_seller_id": string }; Returns: undefined
+                           },
+"search_lots":
+{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+              "area": string,"bid_count": number,"category": string,"closed_at": string,"condition": string,"current_bid": number,"drop_id": string,"drop_title": string,"ends_at": string,"id": string,"outcome": string,"photo": string,"start_price": number,"starts_at": string,"title": string
+            }[]
                            },
 "send_drop_reminders":
 { Args: Record<PropertyKey, never>; Returns: number

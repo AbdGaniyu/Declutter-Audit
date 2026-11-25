@@ -17,7 +17,9 @@ self.addEventListener('push', (event) => {
   let data = { title: 'Declutter', body: 'You have a new update.', url: '/me/notifications', tag: undefined };
   try {
     data = { ...data, ...event.data.json() };
-  } catch (_) {}
+  } catch {
+    // Payload missing or not JSON: fall back to the generic notification.
+  }
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
