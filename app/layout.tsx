@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Header } from '@/components/Header';
+import { TopBar } from '@/components/TopBar';
+import { TopBarProvider } from '@/components/TopBarContext';
 import { ClockSync } from '@/components/ClockSync';
 import { ServiceWorker } from '@/components/ServiceWorker';
 
@@ -32,8 +33,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh bg-bg font-sans text-body text-label antialiased">
         <ClockSync />
         <ServiceWorker />
-        <Header />
-        <main className="mx-auto w-full max-w-grid px-4 pb-28 pt-4">{children}</main>
+        <TopBarProvider>
+          <TopBar />
+          <main className="mx-auto w-full max-w-content px-4 pb-28 pt-4 md:px-8 md:pt-6">{children}</main>
+        </TopBarProvider>
       </body>
     </html>
   );
