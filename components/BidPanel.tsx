@@ -62,7 +62,7 @@ export function BidPanel({
     if (!signedIn || !lot.my_verified) return null; // sliding opens Verify phone
     if (lot.is_seller) return 'This is your lot';
     if (lot.my_suspended) return 'Bidding paused on your account';
-    if (lot.you_are_leading) return "You're the top bidder";
+    if (lot.you_are_leading) return 'Bidding paused while you lead';
     return null;
   })();
   const slideState: SlideState = busy ? 'placing' : paused ? 'paused' : 'ready';
