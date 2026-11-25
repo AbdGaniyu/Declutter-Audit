@@ -38,7 +38,8 @@ Use Python only if we need image or PDF work later. Don't add a separate API ser
 
 - **Opening bid** = `start_price` (the seller's asking price). The first bid must be `>= start_price`.
 - **Minimum step**: set at listing time from the asking price and stored in `auctions.step`:
-  - under ₦20,000 → ₦500
+  - under ₦10,000 → ₦200
+  - ₦10,000 to ₦19,999 → ₦500
   - ₦20,000 to ₦99,999 → ₦1,000
   - ₦100,000 and above → ₦2,500
   - Each later bid must be `>= current_bid + step`.
