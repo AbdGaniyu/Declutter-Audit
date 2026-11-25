@@ -117,15 +117,15 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
 
   if (stage === 'done' && drop && lotId) {
     return (
-      <div className="space-y-4 rounded-card bg-surface p-6 text-center shadow-elev">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-pill bg-winning-soft">
-          <Check {...iconProps} size={24} className="text-winning" />
+      <div className="space-y-4 squircle rounded-group bg-surface p-6 text-center">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-pill bg-fill">
+          <Check {...iconProps} size={24} className="text-label" />
         </span>
-        <h1 className="font-display text-display">Your lot goes live {formatGoLive(drop.opens_at)}</h1>
-        <p className="text-ink-muted">Bidding opens with the {drop.title.toLowerCase()}. We&apos;ll tell you when it sells.</p>
+        <h1 className="text-title-sm md:text-title">Your lot goes live {formatGoLive(drop.opens_at)}</h1>
+        <p className="text-secondary">Bidding opens with the {drop.title.toLowerCase()}. We&apos;ll tell you when it sells.</p>
         <div className="flex flex-col gap-2">
-          <Link href={`/lot/${lotId}`} className="inline-flex min-h-11 items-center justify-center rounded-pill bg-ink font-semibold text-white">View your lot</Link>
-          <button type="button" className="min-h-11 font-semibold text-focus" onClick={() => window.location.reload()}>List another item</button>
+          <Link href={`/lot/${lotId}`} className="inline-flex min-h-11 items-center justify-center rounded-pill bg-label font-semibold text-white">View your lot</Link>
+          <button type="button" className="min-h-11 font-semibold text-label underline underline-offset-2" onClick={() => window.location.reload()}>List another item</button>
         </div>
       </div>
     );
@@ -136,12 +136,12 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-display text-display">{stage === 'review' ? 'Review your lot' : 'Sell an item'}</h1>
+        <h1 className="text-title-sm md:text-title">{stage === 'review' ? 'Review your lot' : 'Sell an item'}</h1>
         <ol className="mt-3 flex gap-2" aria-label="Progress">
           {STEPS.map((s, i) => (
             <li key={s} className="flex-1" aria-current={i === stepIndex ? 'step' : undefined}>
-              <span className={`block h-1 rounded-pill ${i <= stepIndex ? 'bg-ink' : 'bg-line'}`} />
-              <span className={`mt-1 block text-eyebrow uppercase ${i === stepIndex ? 'text-ink' : 'text-ink-muted'}`}>{i + 1}. {s}</span>
+              <span className={`block h-1 rounded-pill ${i <= stepIndex ? 'bg-label' : 'bg-line'}`} />
+              <span className={`mt-1 block text-eyebrow uppercase ${i === stepIndex ? 'text-label' : 'text-secondary'}`}>{i + 1}. {s}</span>
             </li>
           ))}
         </ol>
@@ -149,7 +149,7 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
 
       {stage === 0 && (
         <section className="space-y-3">
-          <p className="text-ink-muted">Add {MIN_PHOTOS} to {MAX_PHOTOS} real photos in good light. The first one is the cover.</p>
+          <p className="text-secondary">Add {MIN_PHOTOS} to {MAX_PHOTOS} real photos in good light. The first one is the cover.</p>
           <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="sr-only" aria-hidden tabIndex={-1}
             onChange={(e) => { void addPhotos(e.target.files); e.target.value = ''; }} />
           <input ref={galleryRef} type="file" accept="image/*" multiple className="sr-only" aria-label="Choose photos from gallery"
@@ -162,13 +162,13 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
               <ImagePlus {...iconProps} size={20} /> From gallery
             </Button>
           </div>
-          <p className="text-body text-ink-muted">
-            <span className="font-num tabular-nums">{photos.length}</span> of {MAX_PHOTOS} · {busy ?? 'Photos are shrunk before upload to save data.'}
+          <p className="text-body text-secondary">
+            <span className="tnum">{photos.length}</span> of {MAX_PHOTOS} · {busy ?? 'Photos are shrunk before upload to save data.'}
           </p>
           {photos.length > 0 && (
             <div className="grid grid-cols-4 gap-2">
               {photos.map((p, i) => (
-                <div key={p.url} className="relative aspect-square overflow-hidden rounded-card border border-line">
+                <div key={p.url} className="relative aspect-square overflow-hidden rounded-card">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={p.url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
                   {i === 0 && <span className="absolute bottom-1 left-1 rounded-pill bg-surface px-1 text-[11px] font-semibold">Cover</span>}
@@ -212,8 +212,8 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
           </div>
           <div>
             <Label htmlFor="price">Asking price (₦)</Label>
-            <Input id="price" inputMode="numeric" placeholder="25,000" className="font-num text-heading tabular-nums" value={price} onChange={(e) => setPrice(e.target.value)} />
-            <p className="mt-1 text-body text-ink-muted">
+            <Input id="price" inputMode="numeric" placeholder="25,000" className="tnum text-title-sm tnum" value={price} onChange={(e) => setPrice(e.target.value)} />
+            <p className="mt-1 text-body text-secondary">
               {priceOk && priceKobo !== null
                 ? <>Bidding opens at <Price kobo={priceKobo} /> and goes up by at least <Price kobo={previewStep(priceKobo)} />.</>
                 : 'Your asking price is the opening bid. Minimum ₦500.'}
@@ -234,7 +234,7 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
               <input type="radio" name="drop" value={d.id} checked={d.id === dropId} onChange={() => setDropId(d.id)} className="h-4 w-4 accent-[var(--ink)]" />
               <span>
                 <span className="block font-semibold">{d.title}</span>
-                <span className="block text-body text-ink-muted">Opens {formatLagosDateTime(d.opens_at)} · <span className="font-num tabular-nums">{d.lot_count}</span> lots</span>
+                <span className="block text-body text-secondary">Opens {formatLagosDateTime(d.opens_at)} · <span className="tnum">{d.lot_count}</span> lots</span>
               </span>
             </label>
           ))}
@@ -242,7 +242,7 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
       )}
 
       {stage === 'review' && drop && priceKobo !== null && (
-        <section className="space-y-3 rounded-card bg-surface p-4 shadow-elev">
+        <section className="space-y-3 squircle rounded-group bg-surface p-4">
           <div className="flex gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={photos[0]?.url} alt="" className="aspect-[4/3] w-28 rounded-card object-cover" />
@@ -252,12 +252,12 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
             </div>
           </div>
           <dl className="grid grid-cols-2 gap-3">
-            <div><dt className="text-eyebrow uppercase text-ink-muted">Opening bid</dt><dd><Price kobo={priceKobo} className="text-price-card" /></dd></div>
-            <div><dt className="text-eyebrow uppercase text-ink-muted">Min step</dt><dd><Price kobo={previewStep(priceKobo)} className="text-price-card" /></dd></div>
-            <div className="col-span-2"><dt className="text-eyebrow uppercase text-ink-muted">Drop</dt><dd>{drop.title} · opens {formatLagosDateTime(drop.opens_at)}</dd></div>
-            <div className="col-span-2"><dt className="text-eyebrow uppercase text-ink-muted">Photos</dt><dd className="font-num tabular-nums">{photos.length}</dd></div>
+            <div><dt className="text-eyebrow uppercase text-secondary">Opening bid</dt><dd><Price kobo={priceKobo} className="text-price-card" /></dd></div>
+            <div><dt className="text-eyebrow uppercase text-secondary">Min step</dt><dd><Price kobo={previewStep(priceKobo)} className="text-price-card" /></dd></div>
+            <div className="col-span-2"><dt className="text-eyebrow uppercase text-secondary">Drop</dt><dd>{drop.title} · opens {formatLagosDateTime(drop.opens_at)}</dd></div>
+            <div className="col-span-2"><dt className="text-eyebrow uppercase text-secondary">Photos</dt><dd className="tnum">{photos.length}</dd></div>
           </dl>
-          <p className="text-body text-ink-muted">
+          <p className="text-body text-secondary">
             When it sells, the buyer pays us first. We pay you the winning bid minus our fee once you get the buyer&apos;s handover code at pickup.
           </p>
         </section>

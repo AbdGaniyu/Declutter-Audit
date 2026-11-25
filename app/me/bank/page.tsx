@@ -9,14 +9,14 @@ export default async function BankPage() {
   return (
     <div className="mx-auto max-w-lot space-y-4">
       <div>
-        <h1 className="font-display text-display">Payout bank account</h1>
-        <p className="text-body text-ink-muted">We pay you here after the buyer gives you their handover code. Payouts are sent with Paystack.</p>
+        <h1 className="text-title-sm md:text-title">Payout bank account</h1>
+        <p className="text-body text-secondary">We pay you here after the buyer gives you their handover code. Payouts are sent with Paystack.</p>
       </div>
       {bank && (
-        <div className="rounded-card bg-surface p-4 shadow-elev">
-          <p className="text-eyebrow uppercase text-ink-muted">Current account</p>
+        <div className="squircle rounded-group bg-surface p-4">
+          <p className="text-eyebrow uppercase text-secondary">Current account</p>
           <p className="font-semibold">{bank.account_name}</p>
-          <p className="text-body text-ink-muted">{bank.bank_name ?? 'Bank'} · ••••{bank.account_number.slice(-4)}</p>
+          <p className="text-body text-secondary">{bank.bank_name ?? 'Bank'} · ••••{bank.account_number.slice(-4)}</p>
         </div>
       )}
       <BankForm hasBank={Boolean(bank)} />

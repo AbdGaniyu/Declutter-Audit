@@ -16,7 +16,7 @@ export function DisputeButton({ orderId }: { orderId: string }) {
 
   if (!open) return <Button block variant="link" onClick={() => setOpen(true)}>Report a problem</Button>;
   return (
-    <div className="space-y-3 rounded-card border border-line bg-surface p-4">
+    <div className="space-y-3 squircle rounded-group bg-surface p-4">
       <div>
         <Label htmlFor={`dispute-${orderId}`}>What went wrong?</Label>
         <Textarea id={`dispute-${orderId}`} rows={3} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)}
@@ -33,7 +33,7 @@ export function DisputeButton({ orderId }: { orderId: string }) {
           router.refresh();
         }}>Report problem</Button>
       </div>
-      <p className="text-body text-ink-muted">The payout is paused while we review. Don&apos;t share the code until it&apos;s sorted.</p>
+      <p className="text-body text-secondary">The payout is paused while we review. Don&apos;t share the code until it&apos;s sorted.</p>
     </div>
   );
 }

@@ -18,11 +18,11 @@ export default async function NotificationsPage() {
   return (
     <div className="mx-auto max-w-lot space-y-4">
       <MarkRead />
-      <h1 className="font-display text-display">Notifications</h1>
+      <h1 className="text-title-sm md:text-title">Notifications</h1>
       {!rows?.length ? (
-        <p className="text-ink-muted">Nothing yet.</p>
+        <p className="text-secondary">Nothing yet.</p>
       ) : (
-        <ul className="divide-y divide-line overflow-hidden rounded-card bg-surface shadow-elev">
+        <ul className="[&>*:not(:last-child)]:hairline-b overflow-hidden squircle rounded-group bg-surface">
           {rows.map((n) => {
             const m = pushMessage({ id: n.id, type: n.type, payload: (n.payload ?? {}) as Record<string, unknown> });
             return (
@@ -32,7 +32,7 @@ export default async function NotificationsPage() {
                   <span>
                     <span className="block font-semibold">{m.title}</span>
                     <span className="block">{m.body}</span>
-                    <span className="block text-body text-ink-muted">{formatLagosDateTime(n.created_at, now)}</span>
+                    <span className="block text-body text-secondary">{formatLagosDateTime(n.created_at, now)}</span>
                   </span>
                 </Link>
               </li>

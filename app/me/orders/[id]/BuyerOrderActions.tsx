@@ -104,7 +104,7 @@ export function BuyerOrderActions({ order, summary, userId }: Props) {
       return (
         <Card className="text-center">
           <p className="font-semibold">Confirming your payment…</p>
-          <p className="mt-1 text-body text-ink-muted">This usually takes a few seconds. You can leave this page.</p>
+          <p className="mt-1 text-body text-secondary">This usually takes a few seconds. You can leave this page.</p>
         </Card>
       );
     }
@@ -159,7 +159,7 @@ export function BuyerOrderActions({ order, summary, userId }: Props) {
   return (
     <Card>
       <p className="font-semibold">{statusLabel(order.status)}</p>
-      <p className="mt-1 text-body text-ink-muted">
+      <p className="mt-1 text-body text-secondary">
         {order.status === 'expired' && (order.refunded_at
           ? 'Your payment arrived after the deadline, so it has been refunded.'
           : order.offer_round === 1 ? "The 30-minute window closed. This counts as a strike on your account." : 'The offer expired.')}

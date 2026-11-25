@@ -29,8 +29,8 @@ const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lagos' });
 function Section({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h2 className="font-display text-heading">{title}{count !== undefined && <span className="font-num text-ink-muted"> {count}</span>}</h2>
-      <div className="rounded-card bg-surface p-4 shadow-elev">{children}</div>
+      <h2 className="text-title-sm">{title}{count !== undefined && <span className="tnum text-secondary"> {count}</span>}</h2>
+      <div className="squircle rounded-group bg-surface p-4">{children}</div>
     </section>
   );
 }
@@ -85,17 +85,17 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
 
   return (
     <div className="space-y-8">
-      <h1 className="font-display text-display">Admin</h1>
+      <h1 className="text-title-sm md:text-title">Admin</h1>
       <ErrorText>{error}</ErrorText>
 
       <Section title="Disputes" count={overview.disputes.length}>
-        {overview.disputes.length === 0 ? <p className="text-ink-muted">None open.</p> : (
+        {overview.disputes.length === 0 ? <p className="text-secondary">None open.</p> : (
           <ul className="space-y-4">
             {overview.disputes.map((d) => (
               <li key={d.id} className="space-y-2">
                 <p className="font-semibold">{d.title} · <Price kobo={d.amount} /></p>
                 <p>“{d.dispute_reason}”</p>
-                <p className="text-body text-ink-muted">
+                <p className="text-body text-secondary">
                   Buyer {d.buyer_name} (+{d.buyer_phone}) · Seller {d.seller_name} (+{d.seller_phone})
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -111,12 +111,12 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
       </Section>
 
       <Section title="Drops calendar">
-        {days.size === 0 && <p className="text-ink-muted">No drops in the next two weeks.</p>}
+        {days.size === 0 && <p className="text-secondary">No drops in the next two weeks.</p>}
         <div className="space-y-4">
           {[...days.entries()].map(([k, ds]) => (
             <div key={k}>
-              <p className="text-eyebrow uppercase text-ink-muted">{dayFmt.format(new Date(ds[0]!.opens_at))}</p>
-              <ul className="mt-1 divide-y divide-line rounded-card border border-line">
+              <p className="text-eyebrow uppercase text-secondary">{dayFmt.format(new Date(ds[0]!.opens_at))}</p>
+              <ul className="mt-1 [&>*:not(:last-child)]:hairline-b rounded-card">
                 {ds.map((d) => {
                   const expanded = openDrop === d.id;
                   return (
@@ -129,10 +129,10 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
                           }}>
                           {expanded ? <ChevronDown {...iconProps} size={18} /> : <ChevronRight {...iconProps} size={18} />}
                           <span>
-                            <span className="block font-semibold">{d.title}{d.status !== 'published' && <span className="text-ink-muted"> · {d.status}</span>}</span>
-                            <span className="block text-body text-ink-muted">
-                              {formatLagosTime(d.opens_at)} · <span className="font-num tabular-nums">{d.lots}/{d.max_lots}</span> lots ·{' '}
-                              <span className="font-num tabular-nums">{d.live_bids}</span> bids
+                            <span className="block font-semibold">{d.title}{d.status !== 'published' && <span className="text-secondary"> · {d.status}</span>}</span>
+                            <span className="block text-body text-secondary">
+                              {formatLagosTime(d.opens_at)} · <span className="tnum">{d.lots}/{d.max_lots}</span> lots ·{' '}
+                              <span className="tnum">{d.live_bids}</span> bids
                             </span>
                           </span>
                         </button>
@@ -144,14 +144,14 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
                         )}
                       </div>
                       {expanded && (
-                        <ul className="divide-y divide-line border-t border-line bg-bg">
-                          {(lots[d.id] ?? []).length === 0 && <li className="p-3 text-ink-muted">No lots.</li>}
+                        <ul className="[&>*:not(:last-child)]:hairline-b bg-bg">
+                          {(lots[d.id] ?? []).length === 0 && <li className="p-3 text-secondary">No lots.</li>}
                           {(lots[d.id] ?? []).map((l) => (
                             <li key={l.id} className="flex items-center justify-between gap-2 p-3">
                               <a href={`/lot/${l.id}`} className="min-w-0">
                                 <span className="block truncate font-semibold">{l.title}</span>
-                                <span className="block text-body text-ink-muted">
-                                  {l.seller_name ?? 'Seller'} · {l.area} · closes {formatLagosTime(l.ends_at)} · <span className="font-num">{l.bid_count}</span> bids
+                                <span className="block text-body text-secondary">
+                                  {l.seller_name ?? 'Seller'} · {l.area} · closes {formatLagosTime(l.ends_at)} · <span className="tnum">{l.bid_count}</span> bids
                                 </span>
                               </a>
                               <span className="flex shrink-0 items-center gap-2">
@@ -175,7 +175,7 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
           ))}
         </div>
 
-        <form className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4" onSubmit={(e) => {
+        <form className="mt-4 grid grid-cols-2 gap-3 pt-4" onSubmit={(e) => {
           e.preventDefault();
           const opens = lagosLocalToIso(drop.opens);
           const firstClose = new Date(Date.parse(opens) + Number(drop.closesAfter) * 60_000).toISOString();
@@ -189,22 +189,22 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
           <div className="col-span-2"><Label htmlFor="do">Opens (Lagos time)</Label>
             <Input id="do" type="datetime-local" required value={drop.opens} onChange={(e) => setDrop({ ...drop, opens: e.target.value })} /></div>
           <div><Label htmlFor="dc">First close after (min)</Label>
-            <Input id="dc" inputMode="numeric" className="font-num" value={drop.closesAfter} onChange={(e) => setDrop({ ...drop, closesAfter: e.target.value })} /></div>
+            <Input id="dc" inputMode="numeric" className="tnum" value={drop.closesAfter} onChange={(e) => setDrop({ ...drop, closesAfter: e.target.value })} /></div>
           <div><Label htmlFor="di">Lots close every (s)</Label>
-            <Input id="di" inputMode="numeric" className="font-num" value={drop.interval} onChange={(e) => setDrop({ ...drop, interval: e.target.value })} /></div>
+            <Input id="di" inputMode="numeric" className="tnum" value={drop.interval} onChange={(e) => setDrop({ ...drop, interval: e.target.value })} /></div>
           <div><Label htmlFor="dm">Max lots</Label>
-            <Input id="dm" inputMode="numeric" className="font-num" value={drop.maxLots} onChange={(e) => setDrop({ ...drop, maxLots: e.target.value })} /></div>
+            <Input id="dm" inputMode="numeric" className="tnum" value={drop.maxLots} onChange={(e) => setDrop({ ...drop, maxLots: e.target.value })} /></div>
           <div className="flex items-end"><Button type="submit" block disabled={busy}>Create drop</Button></div>
         </form>
       </Section>
 
       <Section title="Strikes" count={overview.struck_users.length}>
-        {overview.struck_users.length === 0 ? <p className="text-ink-muted">Nobody has strikes.</p> : (
-          <ul className="divide-y divide-line">
+        {overview.struck_users.length === 0 ? <p className="text-secondary">Nobody has strikes.</p> : (
+          <ul className="[&>*:not(:last-child)]:hairline-b">
             {overview.struck_users.map((u) => (
               <li key={u.id} className="flex items-center justify-between gap-2 py-2">
                 <span>
-                  {u.display_name ?? 'Unnamed'} (+{u.phone}) · <span className="font-num">{u.strikes}</span> strike{u.strikes === 1 ? '' : 's'}
+                  {u.display_name ?? 'Unnamed'} (+{u.phone}) · <span className="tnum">{u.strikes}</span> strike{u.strikes === 1 ? '' : 's'}
                   {u.bidding_suspended && <span className="font-semibold"> · suspended</span>}
                 </span>
                 <Button variant="link" disabled={busy}
@@ -218,11 +218,11 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
       </Section>
 
       <Section title="Failed payouts" count={overview.failed_payouts.length}>
-        {overview.failed_payouts.length === 0 ? <p className="text-ink-muted">None.</p> : (
-          <ul className="divide-y divide-line">
+        {overview.failed_payouts.length === 0 ? <p className="text-secondary">None.</p> : (
+          <ul className="[&>*:not(:last-child)]:hairline-b">
             {overview.failed_payouts.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-2 py-2">
-                <span><span className="font-num">{formatNaira(p.amount)}</span> · {p.status} · {p.failure_reason ?? 'no reason'} · {p.attempts} tries</span>
+                <span><span className="tnum">{formatNaira(p.amount)}</span> · {p.status} · {p.failure_reason ?? 'no reason'} · {p.attempts} tries</span>
                 <Button variant="link" disabled={busy} onClick={() => run(() => supabase.rpc('admin_retry_payout', { p_payout_id: p.id }))}>Retry</Button>
               </li>
             ))}
@@ -231,13 +231,13 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
       </Section>
 
       <Section title="Alerts" count={overview.alerts.length}>
-        {overview.alerts.length === 0 ? <p className="text-ink-muted">All clear.</p> : (
-          <ul className="divide-y divide-line">
+        {overview.alerts.length === 0 ? <p className="text-secondary">All clear.</p> : (
+          <ul className="[&>*:not(:last-child)]:hairline-b">
             {overview.alerts.map((a) => (
               <li key={a.id} className="flex items-start justify-between gap-2 py-2">
                 <span>
                   <span className="font-semibold">{a.kind}</span> · {formatLagosDateTime(a.created_at)}
-                  <br /><span className="break-all text-body text-ink-muted">{JSON.stringify(a.detail)}</span>
+                  <br /><span className="break-all text-body text-secondary">{JSON.stringify(a.detail)}</span>
                 </span>
                 <Button variant="link" disabled={busy}
                   onClick={() => run(() => supabase.from('ops_alerts').update({ resolved_at: new Date().toISOString() }).eq('id', a.id))}>
