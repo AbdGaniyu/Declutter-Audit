@@ -33,6 +33,9 @@ describe('parseNairaInput', () => {
 
 describe('previewStep (mirror of public.step_for)', () => {
   it('matches the step table', () => {
+    expect(previewStep(50_000)).toBe(20_000);
+    expect(previewStep(999_900)).toBe(20_000);
+    expect(previewStep(1_000_000)).toBe(50_000);
     expect(previewStep(1_999_900)).toBe(50_000);
     expect(previewStep(2_000_000)).toBe(100_000);
     expect(previewStep(9_999_900)).toBe(100_000);

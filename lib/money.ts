@@ -36,6 +36,7 @@ export function parseNairaInput(input: string): number | null {
  * (stored in auctions.step); this is only for previewing it in the listing form.
  */
 export function previewStep(startPriceKobo: number): number {
+  if (startPriceKobo < 1_000_000) return 20_000;
   if (startPriceKobo < 2_000_000) return 50_000;
   if (startPriceKobo < 10_000_000) return 100_000;
   return 250_000;
