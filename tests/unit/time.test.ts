@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCountdown, formatLagosDateTime, formatLagosTime, lotPhase } from '@/lib/time';
+import { formatClock, formatCountdown, formatLagosDateTime, formatLagosTime, lotPhase } from '@/lib/time';
 
 describe('Lagos time formatting', () => {
   it('formats UTC as Lagos (UTC+1) 12-hour time', () => {
@@ -30,5 +30,18 @@ describe('lotPhase', () => {
     expect(lotPhase(s, e, null, Date.parse(s))).toBe('live');
     expect(lotPhase(s, e, null, Date.parse(e))).toBe('ended');
     expect(lotPhase(s, e, '2026-11-19T18:30:01Z', Date.parse(s))).toBe('ended');
+  });
+});
+
+describe('formatClock (DESIGN.md v2 countdown)', () => {
+  it('pads minutes above a minute, drops the pad in the last minute', () => {
+    expect(formatClock(63_000)).toBe('01:03');
+    expect(formatClock(190_000)).toBe('03:10');
+    expect(formatClock(60_000)).toBe('1:00');
+    expect(formatClock(42_000)).toBe('0:42');
+    expect(formatClock(0)).toBe('0:00');
+  });
+  it('shows hours when needed', () => {
+    expect(formatClock(3_723_000)).toBe('1:02:03');
   });
 });

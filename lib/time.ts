@@ -72,3 +72,22 @@ export function formatGoLive(d: Date | string | number): string {
   const t = formatLagosTime(d).replace(':00', '');
   return `${goLiveFmt.format(new Date(d))} ${t}`;
 }
+
+/**
+ * v2 countdown text (DESIGN.md › Countdown pill): "03:10" above a minute,
+ * "0:42" in the last minute, "1:02:03" past an hour.
+ */
+export function formatClock(ms: number): string {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const ss = String(total % 60).padStart(2, '0');
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`;
+  if (total <= 60) return `${m}:${ss}`;
+  return `${String(m).padStart(2, '0')}:${ss}`;
+}
+
+/** "March 2024" in Lagos time (seller "Member since"). */
+export function formatMonthYear(d: Date | string | number): string {
+  return new Intl.DateTimeFormat('en-NG', { month: 'long', year: 'numeric', timeZone: LAGOS_TZ }).format(new Date(d));
+}
