@@ -86,7 +86,7 @@ The e2e payment test needs the Edge Functions running with `PAYSTACK_API_URL` po
 - **Lot page:** one bid panel renders as a glass dock with a drag-up drawer on phones and as a sticky floating panel on desktop, so there's only ever one slider in the page.
 - **Orders:** `/me/orders` has Buying and Selling. Selling has the seller segments (Awaiting payment, Ready for pickup, Paid out), and `/me/sales` redirects there.
 - **Admin:** `/admin` (week calendar of drops), `/admin/lots`, `/admin/users`, `/admin/disputes` and `/admin/strikes`, behind an `is_admin` check in `app/admin/layout.tsx`.
-- **Not decided yet:** the app name and logo. The nav draws a monochrome ring mark (`LogoMark`), and the PWA icons in `public/icons` are still the v1 artwork.
+- **Not decided yet:** the app name and logo. The nav (`LogoMark`) and the PWA icons (`public/icons/icon.svg`, PNGs rendered from it) use an interim monochrome ring mark. Swap both when the real logo exists.
 
 ## Decisions and additions beyond CLAUDE.md
 
