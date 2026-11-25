@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeNigerianPhone } from '@/lib/phone';
+import { maskPhone, normalizeNigerianPhone } from '@/lib/phone';
 
 describe('normalizeNigerianPhone', () => {
   it('normalises common formats to E.164', () => {
@@ -13,5 +13,15 @@ describe('normalizeNigerianPhone', () => {
     expect(normalizeNigerianPhone('0123')).toBeNull();
     expect(normalizeNigerianPhone('01234567890')).toBeNull();
     expect(normalizeNigerianPhone('+14155552671')).toBeNull();
+  });
+});
+
+describe('maskPhone (Verify phone, PDF p.10)', () => {
+  it('shows the prefix and last four digits of a Nigerian number', () => {
+    expect(maskPhone('2348032212211')).toBe('0803 ••• 2211');
+    expect(maskPhone('+2348032212211')).toBe('0803 ••• 2211');
+  });
+  it('leaves anything else alone', () => {
+    expect(maskPhone('12345')).toBe('12345');
   });
 });
