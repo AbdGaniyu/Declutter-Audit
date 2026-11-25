@@ -56,7 +56,7 @@ export function StatusBanner({ lot, now, canBid, busy, onQuickBid }: {
   if (lot.you_are_leading) {
     return (
       <Banner tone="winning" icon={<CircleCheck {...iconProps} size={20} className="text-winning" />}>
-        <p className="font-semibold">You're winning at <span className="font-num tabular-nums">{formatNaira(lot.current_bid)}</span></p>
+        <p className="font-semibold">You&apos;re winning at <span className="font-num tabular-nums">{formatNaira(lot.current_bid)}</span></p>
       </Banner>
     );
   }
@@ -65,7 +65,7 @@ export function StatusBanner({ lot, now, canBid, busy, onQuickBid }: {
       <Banner tone="outbid" icon={<CircleAlert {...iconProps} size={20} className="text-outbid" />}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="font-semibold">
-            You've been outbid — <span className="font-num tabular-nums">{formatNaira(lot.current_bid)}</span> now
+            You&apos;ve been outbid — <span className="font-num tabular-nums">{formatNaira(lot.current_bid)}</span> now
           </p>
           <Button variant="live" busy={busy} disabled={!canBid} onClick={() => onQuickBid(lot.min_next)}>
             Bid {formatNaira(lot.min_next)}

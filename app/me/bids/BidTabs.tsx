@@ -39,7 +39,7 @@ export function BidTabs({ rows, renderedAt }: { rows: BidRow[]; renderedAt: numb
       <div role="tabpanel" className="mt-4">
         {groups[tab].length === 0 ? (
           <p className="text-ink-muted">
-            {tab === 'live' ? <>No live bids. <Link href="/" className="font-semibold text-focus">See tonight's drop</Link></> : 'Nothing here yet.'}
+            {tab === 'live' ? <>No live bids. <Link href="/" className="font-semibold text-focus">See tonight&apos;s drop</Link></> : 'Nothing here yet.'}
           </p>
         ) : (
           <ul className="divide-y divide-line overflow-hidden rounded-card bg-surface shadow-elev">

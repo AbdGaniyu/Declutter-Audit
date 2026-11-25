@@ -87,7 +87,7 @@ export default async function SalesPage() {
               <p className="font-semibold">{o.title}</p>
               <Money o={o} />
               <p className="text-body text-ink-muted">
-                {o.counterpart_name ?? 'The buyer'} has until {formatLagosDateTime(o.pay_by, now)} to pay. If they don't, it goes to the next bidder.
+                {o.counterpart_name ?? 'The buyer'} has until {formatLagosDateTime(o.pay_by, now)} to pay. If they don&apos;t, it goes to the next bidder.
               </p>
             </div>
           ))}
@@ -126,7 +126,7 @@ export default async function SalesPage() {
       <section className="space-y-3">
         <h2 className="font-display text-heading">My lots</h2>
         {!lots?.length ? (
-          <p className="text-ink-muted">You haven't listed anything yet.</p>
+          <p className="text-ink-muted">You haven&apos;t listed anything yet.</p>
         ) : (
           <ul className="divide-y divide-line overflow-hidden rounded-card bg-surface shadow-elev">
             {lots.map((l) => {

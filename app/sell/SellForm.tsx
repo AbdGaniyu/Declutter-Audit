@@ -122,7 +122,7 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
           <Check {...iconProps} size={24} className="text-winning" />
         </span>
         <h1 className="font-display text-display">Your lot goes live {formatGoLive(drop.opens_at)}</h1>
-        <p className="text-ink-muted">Bidding opens with the {drop.title.toLowerCase()}. We'll tell you when it sells.</p>
+        <p className="text-ink-muted">Bidding opens with the {drop.title.toLowerCase()}. We&apos;ll tell you when it sells.</p>
         <div className="flex flex-col gap-2">
           <Link href={`/lot/${lotId}`} className="inline-flex min-h-11 items-center justify-center rounded-pill bg-ink font-semibold text-white">View your lot</Link>
           <button type="button" className="min-h-11 font-semibold text-focus" onClick={() => window.location.reload()}>List another item</button>
@@ -258,7 +258,7 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
             <div className="col-span-2"><dt className="text-label uppercase text-ink-muted">Photos</dt><dd className="font-num tabular-nums">{photos.length}</dd></div>
           </dl>
           <p className="text-body text-ink-muted">
-            When it sells, the buyer pays us first. We pay you the winning bid minus our fee once you get the buyer's handover code at pickup.
+            When it sells, the buyer pays us first. We pay you the winning bid minus our fee once you get the buyer&apos;s handover code at pickup.
           </p>
         </section>
       )}

@@ -33,7 +33,7 @@ export function DisputeButton({ orderId }: { orderId: string }) {
           router.refresh();
         }}>Report problem</Button>
       </div>
-      <p className="text-body text-ink-muted">The payout is paused while we review. Don't share the code until it's sorted.</p>
+      <p className="text-body text-ink-muted">The payout is paused while we review. Don&apos;t share the code until it&apos;s sorted.</p>
     </div>
   );
 }

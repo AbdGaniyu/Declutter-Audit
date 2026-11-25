@@ -85,7 +85,7 @@ export function BuyerOrderActions({ order, userId }: Props) {
       <div>
         <p className="font-semibold">Your money is held until you collect the item</p>
         <p className="mt-1 text-body text-ink-muted">
-          We only pay the seller after you have the item and give them your 6-digit handover code. If something's wrong, report it and we'll step in.
+          We only pay the seller after you have the item and give them your 6-digit handover code. If something&apos;s wrong, report it and we&apos;ll step in.
         </p>
       </div>
     </div>

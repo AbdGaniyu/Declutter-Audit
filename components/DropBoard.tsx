@@ -53,7 +53,7 @@ export function DropBoard({ hero, lots, upcoming, renderedAt, signedIn }: {
   return (
     <div className="space-y-8">
       <section className="rounded-card bg-surface p-4 shadow-elev">
-        <p className="text-label uppercase text-ink-muted">Tonight's drop</p>
+        <p className="text-label uppercase text-ink-muted">Tonight&apos;s drop</p>
         <h1 className="mt-1 font-display text-display">{hero.title}</h1>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
           {live ? (
