@@ -104,7 +104,7 @@ export function BuyerOrderActions({ order, userId }: Props) {
     return (
       <div className="space-y-4">
         <Card>
-          <p className="text-label uppercase text-ink-muted">Pay within</p>
+          <p className="text-eyebrow uppercase text-ink-muted">Pay within</p>
           {left > 0 ? (
             <p className={`font-num text-countdown tabular-nums ${left <= 60_000 ? 'text-live' : 'text-ink'}`}>{formatCountdown(left)}</p>
           ) : (
@@ -129,7 +129,7 @@ export function BuyerOrderActions({ order, userId }: Props) {
     return (
       <div className="space-y-4">
         <Card className="text-center">
-          <p className="text-label uppercase text-ink-muted">Your handover code</p>
+          <p className="text-eyebrow uppercase text-ink-muted">Your handover code</p>
           <p className="my-3 font-num text-code tabular-nums" aria-label="Handover code">{code ?? '······'}</p>
           <p className="font-semibold">Give this code to the seller only when you have the item.</p>
         </Card>

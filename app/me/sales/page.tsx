@@ -20,9 +20,9 @@ type Order = {
 function Money({ o }: { o: Order }) {
   return (
     <dl className="grid grid-cols-3 gap-2">
-      <div><dt className="text-label uppercase text-ink-muted">Sold for</dt><dd><Price kobo={o.amount} /></dd></div>
-      <div><dt className="text-label uppercase text-ink-muted">Our fee</dt><dd><Price kobo={o.commission} /></dd></div>
-      <div><dt className="text-label uppercase text-ink-muted">You get</dt><dd><Price kobo={o.payout_amount} className="font-semibold" /></dd></div>
+      <div><dt className="text-eyebrow uppercase text-ink-muted">Sold for</dt><dd><Price kobo={o.amount} /></dd></div>
+      <div><dt className="text-eyebrow uppercase text-ink-muted">Our fee</dt><dd><Price kobo={o.commission} /></dd></div>
+      <div><dt className="text-eyebrow uppercase text-ink-muted">You get</dt><dd><Price kobo={o.payout_amount} className="font-semibold" /></dd></div>
     </dl>
   );
 }

@@ -141,7 +141,7 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
           {STEPS.map((s, i) => (
             <li key={s} className="flex-1" aria-current={i === stepIndex ? 'step' : undefined}>
               <span className={`block h-1 rounded-pill ${i <= stepIndex ? 'bg-ink' : 'bg-line'}`} />
-              <span className={`mt-1 block text-label uppercase ${i === stepIndex ? 'text-ink' : 'text-ink-muted'}`}>{i + 1}. {s}</span>
+              <span className={`mt-1 block text-eyebrow uppercase ${i === stepIndex ? 'text-ink' : 'text-ink-muted'}`}>{i + 1}. {s}</span>
             </li>
           ))}
         </ol>
@@ -252,10 +252,10 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
             </div>
           </div>
           <dl className="grid grid-cols-2 gap-3">
-            <div><dt className="text-label uppercase text-ink-muted">Opening bid</dt><dd><Price kobo={priceKobo} className="text-price-card" /></dd></div>
-            <div><dt className="text-label uppercase text-ink-muted">Min step</dt><dd><Price kobo={previewStep(priceKobo)} className="text-price-card" /></dd></div>
-            <div className="col-span-2"><dt className="text-label uppercase text-ink-muted">Drop</dt><dd>{drop.title} · opens {formatLagosDateTime(drop.opens_at)}</dd></div>
-            <div className="col-span-2"><dt className="text-label uppercase text-ink-muted">Photos</dt><dd className="font-num tabular-nums">{photos.length}</dd></div>
+            <div><dt className="text-eyebrow uppercase text-ink-muted">Opening bid</dt><dd><Price kobo={priceKobo} className="text-price-card" /></dd></div>
+            <div><dt className="text-eyebrow uppercase text-ink-muted">Min step</dt><dd><Price kobo={previewStep(priceKobo)} className="text-price-card" /></dd></div>
+            <div className="col-span-2"><dt className="text-eyebrow uppercase text-ink-muted">Drop</dt><dd>{drop.title} · opens {formatLagosDateTime(drop.opens_at)}</dd></div>
+            <div className="col-span-2"><dt className="text-eyebrow uppercase text-ink-muted">Photos</dt><dd className="font-num tabular-nums">{photos.length}</dd></div>
           </dl>
           <p className="text-body text-ink-muted">
             When it sells, the buyer pays us first. We pay you the winning bid minus our fee once you get the buyer&apos;s handover code at pickup.

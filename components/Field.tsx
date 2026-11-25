@@ -7,7 +7,7 @@ const base =
 
 export function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1 block text-label uppercase text-ink-muted">
+    <label htmlFor={htmlFor} className="mb-1 block text-eyebrow uppercase text-ink-muted">
       {children}
     </label>
   );

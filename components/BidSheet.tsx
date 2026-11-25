@@ -65,7 +65,7 @@ export function BidSheet({ open, minNext, step, busy, rejection, onClose, onConf
                 onClick={() => { setAmount(p.value); setTyped(''); }}
                 className={`flex min-h-14 flex-col items-center justify-center rounded-card border ${
                   on ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-ink'}`}>
-                <span className="text-label uppercase">{p.label}</span>
+                <span className="text-eyebrow uppercase">{p.label}</span>
                 <span className="font-num text-[17px] font-semibold tabular-nums">{formatNaira(p.value)}</span>
               </button>
             );

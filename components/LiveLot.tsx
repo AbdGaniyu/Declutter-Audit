@@ -192,7 +192,7 @@ export function LiveLot({ initial, signedIn }: { initial: Lot; signedIn: boolean
       {/* The clock is the hero: price and time left are the biggest things on screen. */}
       <div className="flex items-end justify-between gap-4 rounded-card bg-surface p-4 shadow-elev">
         <div className="min-w-0">
-          <p className="text-label uppercase text-ink-muted">{priceLabel}</p>
+          <p className="text-eyebrow uppercase text-ink-muted">{priceLabel}</p>
           {lot.outcome === 'cancelled' || (ended && !lot.current_bid)
             ? <Price kobo={lot.start_price} className="text-price-lot text-ended" />
             : <LivePrice kobo={lot.current_bid ?? lot.start_price} className="text-price-lot" />}
@@ -201,7 +201,7 @@ export function LiveLot({ initial, signedIn }: { initial: Lot; signedIn: boolean
           )}
         </div>
         <div className="flex min-h-20 flex-col items-end justify-end text-right">
-          {phase === 'live' && <p className="text-label uppercase text-ink-muted">Time left</p>}
+          {phase === 'live' && <p className="text-eyebrow uppercase text-ink-muted">Time left</p>}
           <Countdown startsAt={lot.starts_at} endsAt={lot.ends_at} closedAt={lot.closed_at} now={now}
             stale={!connected} announce />
         </div>
@@ -241,13 +241,13 @@ export function LiveLot({ initial, signedIn }: { initial: Lot; signedIn: boolean
 
       {lot.description && (
         <section>
-          <h2 className="text-label uppercase text-ink-muted">Description</h2>
+          <h2 className="text-eyebrow uppercase text-ink-muted">Description</h2>
           <p className="mt-1 whitespace-pre-line">{lot.description}</p>
         </section>
       )}
 
       <section>
-        <h2 className="text-label uppercase text-ink-muted">Bids</h2>
+        <h2 className="text-eyebrow uppercase text-ink-muted">Bids</h2>
         {history.length === 0 ? (
           <p className="mt-1 text-ink-muted">No bids yet. Opening bid is {formatNaira(lot.start_price)}.</p>
         ) : (
@@ -269,7 +269,7 @@ export function LiveLot({ initial, signedIn }: { initial: Lot; signedIn: boolean
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-lot items-center gap-3 px-4 py-2">
           <div className="min-w-0">
-            <p className="text-label uppercase text-ink-muted">{lot.current_bid ? 'Current' : 'Opening'}</p>
+            <p className="text-eyebrow uppercase text-ink-muted">{lot.current_bid ? 'Current' : 'Opening'}</p>
             <Price kobo={lot.current_bid ?? lot.start_price} className="text-price-card" />
           </div>
           <div className="ml-auto flex min-w-0 flex-col items-end">

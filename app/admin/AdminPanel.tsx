@@ -115,7 +115,7 @@ export function AdminPanel({ overview, calendar }: { overview: Overview; calenda
         <div className="space-y-4">
           {[...days.entries()].map(([k, ds]) => (
             <div key={k}>
-              <p className="text-label uppercase text-ink-muted">{dayFmt.format(new Date(ds[0]!.opens_at))}</p>
+              <p className="text-eyebrow uppercase text-ink-muted">{dayFmt.format(new Date(ds[0]!.opens_at))}</p>
               <ul className="mt-1 divide-y divide-line rounded-card border border-line">
                 {ds.map((d) => {
                   const expanded = openDrop === d.id;

@@ -14,7 +14,7 @@ export default async function BankPage() {
       </div>
       {bank && (
         <div className="rounded-card bg-surface p-4 shadow-elev">
-          <p className="text-label uppercase text-ink-muted">Current account</p>
+          <p className="text-eyebrow uppercase text-ink-muted">Current account</p>
           <p className="font-semibold">{bank.account_name}</p>
           <p className="text-body text-ink-muted">{bank.bank_name ?? 'Bank'} · ••••{bank.account_number.slice(-4)}</p>
         </div>

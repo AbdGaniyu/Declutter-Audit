@@ -37,7 +37,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       </section>
       <section className="flex items-end justify-between rounded-card bg-surface p-4 shadow-elev">
         <div>
-          <p className="text-label uppercase text-ink-muted">Total to pay</p>
+          <p className="text-eyebrow uppercase text-ink-muted">Total to pay</p>
           <Price kobo={order.amount} className="text-price-lot" />
         </div>
       </section>

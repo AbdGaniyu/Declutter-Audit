@@ -43,7 +43,7 @@ export function LivePrice({ kobo, className = '' }: { kobo: number; className?: 
   }, [kobo]);
 
   return (
-    <span key={flashKey} className={`-mx-1 rounded-card px-1 font-num tabular-nums ${flashKey ? 'flash-live-soft' : ''} ${className}`}>
+    <span key={flashKey} className={`-mx-1 rounded-card px-1 font-num tabular-nums ${flashKey ? 'flash-fill' : ''} ${className}`}>
       {formatNaira(shown)}
     </span>
   );

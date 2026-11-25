@@ -64,7 +64,7 @@ export default async function MePage() {
       </nav>
 
       <section className="space-y-2">
-        <h2 className="text-label uppercase text-ink-muted">Alerts on this phone</h2>
+        <h2 className="text-eyebrow uppercase text-ink-muted">Alerts on this phone</h2>
         <PushToggle />
       </section>
 

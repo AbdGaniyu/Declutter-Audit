@@ -16,7 +16,7 @@ export function CodeInput({ value, onChange, label, idPrefix }: {
 
   return (
     <fieldset>
-      <legend className="mb-1 text-label uppercase text-ink-muted">{label}</legend>
+      <legend className="mb-1 text-eyebrow uppercase text-ink-muted">{label}</legend>
       <div className="flex justify-between gap-2">
         {digits.map((d, i) => (
           <input key={i} id={`${idPrefix}-${i}`} ref={(el) => { refs.current[i] = el; }}

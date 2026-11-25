@@ -18,7 +18,7 @@ const labels: Record<Kind, string> = { live: 'Live', upcoming: 'Upcoming', ended
 
 export function Badge({ kind, children }: { kind: Kind; children?: React.ReactNode }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-label uppercase ${styles[kind]}`}>
+    <span className={`inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-eyebrow uppercase ${styles[kind]}`}>
       {kind === 'live' && <LiveDot />}
       {kind === 'upcoming' && <Clock {...iconProps} size={12} />}
       {(kind === 'ended' || kind === 'unsold') && <Minus {...iconProps} size={12} className="text-ended" />}
@@ -44,11 +44,11 @@ export function Pill({ children }: { children: React.ReactNode }) {
 /** Inline status chip with icon + label (never color alone). */
 export function StatusChip({ kind }: { kind: 'winning' | 'outbid' }) {
   return kind === 'winning' ? (
-    <span className="inline-flex items-center gap-1 rounded-pill bg-winning-soft px-2 py-0.5 text-label uppercase text-ink">
+    <span className="inline-flex items-center gap-1 rounded-pill bg-winning-soft px-2 py-0.5 text-eyebrow uppercase text-ink">
       <Check {...iconProps} size={12} className="text-winning" /> Winning
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-pill bg-outbid-soft px-2 py-0.5 text-label uppercase text-ink">
+    <span className="inline-flex items-center gap-1 rounded-pill bg-outbid-soft px-2 py-0.5 text-eyebrow uppercase text-ink">
       <CircleAlert {...iconProps} size={12} className="text-outbid" /> Outbid
     </span>
   );
