@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { seedLiveLot, seedSeller, signIn } from './helpers';
+import { db, seedLiveLot, seedSeller, signIn } from './helpers';
 
 /** Drag the slide-to-bid thumb past 85% and release (the pointer path). */
 async function slide(page: Page, amountLabel: string) {
@@ -68,4 +68,42 @@ test('signed-out bidders are asked to verify their phone in place', async ({ pag
   await page.getByRole('button', { name: 'Bid ₦10,000' }).click();
   await expect(page.getByRole('dialog', { name: 'Verify your phone to bid' })).toBeVisible();
   await expect(page).toHaveURL(new RegExp(`/lot/${lotId}$`));
+});
+
+test('a "Bid ₦X" link preselects that amount on the lot page', async ({ browser }) => {
+  const seller = await seedSeller();
+  const { lotId } = await seedLiveLot(seller);
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await signIn(page, '08000000001', 'Ada', `/lot/${lotId}?amount=1100000`);
+  // Opening ₦10,000 with a ₦500 step: chips are Opening / +₦1,000 → ₦11,000 / +₦2,500 → ₦12,500.
+  await expect(page.getByRole('button', { name: 'Bid ₦11,000' })).toBeVisible();
+  await ctx.close();
+});
+
+test('a bid that loses the race is rejected and the slider moves to the new minimum', async ({ browser }) => {
+  const seller = await seedSeller();
+  const { lotId } = await seedLiveLot(seller);
+  const ctx = await browser.newContext();
+  const a = await ctx.newPage();
+  await signIn(a, '08000000001', 'Ada', `/lot/${lotId}`);
+  const [{ id: rival }] = await db<{ id: string }>(`select id from auth.users where phone = '2348000000002'`);
+
+  // Someone else's ₦10,000 bid reaches Postgres just before A's.
+  await a.route('**/rest/v1/rpc/place_bid', async (route) => {
+    await db(`begin;
+      select set_config('role', 'authenticated', true),
+             set_config('request.jwt.claims', '{"sub":"${rival}","role":"authenticated"}', true);
+      select public.place_bid('${lotId}', 1000000);
+      commit;`);
+    await route.continue();
+  });
+  await a.getByRole('button', { name: 'Bid ₦10,000' }).press('Enter');
+
+  await expect(a.getByRole('alert').filter({ hasText: 'Someone bid ₦10,000 first. Slide again for ₦10,500.' })).toBeVisible();
+  await expect(a.getByRole('button', { name: 'Bid ₦10,500' })).toBeVisible();
+  await a.unroute('**/rest/v1/rpc/place_bid');
+  await a.getByRole('button', { name: 'Bid ₦10,500' }).press('Enter');
+  await expect(a.getByRole('status').getByText("You're the top bidder")).toBeVisible();
+  await ctx.close();
 });

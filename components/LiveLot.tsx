@@ -26,7 +26,8 @@ export function LiveLot({ initial, signedIn, preferAmount = null }: { initial: L
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [rejection, setRejection] = useState<{ key: number; message: string } | null>(null);
+  // atBid: the price that beat us. A broadcast only clears the message once the price moves past it.
+  const [rejection, setRejection] = useState<{ key: number; message: string; atBid?: number } | null>(null);
   const [connected, setConnected] = useState(true);
   const now = useServerNow(200, Date.parse(initial.server_now));
   const seenBids = useRef<Set<string> | null>(null);
@@ -58,7 +59,7 @@ export function LiveLot({ initial, signedIn, preferAmount = null }: { initial: L
           const payload = p as unknown as AuctionBroadcast;
           noteServerNow(payload.server_now);
           setLot((l) => applyBroadcast(l, payload));
-          setRejection(null);
+          setRejection((r) => (r && (r.atBid === undefined || (payload.current_bid ?? 0) > r.atBid) ? null : r));
           clearTimeout(historyTimer);
           historyTimer = setTimeout(() => void loadHistory(), 300);
         },
@@ -142,7 +143,7 @@ export function LiveLot({ initial, signedIn, preferAmount = null }: { initial: L
     const message = r.reason === 'too_low' && typeof r.current_bid === 'number'
       ? `Someone bid ${formatNaira(r.current_bid)} first. Slide again for ${formatNaira(r.min_next as number)}.`
       : messageFor(r.reason as string);
-    setRejection({ key: Date.now(), message });
+    setRejection({ key: Date.now(), message, atBid: typeof r.current_bid === 'number' ? r.current_bid : undefined });
     if (r.reason === 'ended' || r.reason === 'already_leading' || r.reason === 'suspended') void refetch();
   }
 

@@ -45,8 +45,15 @@ export function BidPanel({
   const [expanded, setExpanded] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // A new minimum (outbid, or a rejection) resets to the first chip.
-  useEffect(() => setSelected(0), [lot.min_next, rejection?.key]);
+  // A new minimum (outbid, or a rejection) resets to the first chip. Not on mount:
+  // a "Bid ₦X" link's preselection must survive the first render.
+  const resetKey = `${lot.min_next}:${rejection?.key ?? ''}`;
+  const lastResetKey = useRef(resetKey);
+  useEffect(() => {
+    if (lastResetKey.current === resetKey) return;
+    lastResetKey.current = resetKey;
+    setSelected(0);
+  }, [resetKey]);
 
   const ended = phase === 'ended';
   const cancelled = lot.outcome === 'cancelled';
