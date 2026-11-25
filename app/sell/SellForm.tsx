@@ -1,28 +1,44 @@
 'use client';
-import { Camera, Check, ImagePlus, X } from 'lucide-react';
+import { ArrowLeft, Camera, Check, Gavel, ImagePlus, MapPin, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Pill } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { ErrorText, Input, Label, Select, Textarea } from '@/components/Field';
+import { GroupedRow, TrustCard } from '@/components/GroupedList';
 import { iconProps } from '@/components/icons';
 import { Price } from '@/components/Price';
 import { CATEGORIES, CONDITIONS, LAGOS_AREAS, conditionLabel } from '@/lib/areas';
 import { messageFor } from '@/lib/errors';
-import { MIN_START_PRICE_KOBO, parseNairaInput, previewStep } from '@/lib/money';
+import { MIN_START_PRICE_KOBO, formatNaira, parseNairaInput, previewStep } from '@/lib/money';
 import { compressImage } from '@/lib/photos';
 import { getBrowserSupabase } from '@/lib/supabase/client';
-import { formatGoLive, formatLagosDateTime } from '@/lib/time';
+import { LAGOS_TZ, formatGoLive, formatLagosTime } from '@/lib/time';
 
 const MIN_PHOTOS = 3;
 const MAX_PHOTOS = 8;
+const TITLE_MAX = 60;
 const STEPS = ['Photos', 'Details', 'Drop'] as const;
+
+const CONDITION_HINT: Record<string, string> = {
+  new: 'New: never used, still in the box.',
+  like_new: 'Like new: barely used, no marks.',
+  good: 'Good: used and works well, light marks.',
+  fair: 'Fair: visible wear, still works.',
+  for_parts: "For parts: doesn't fully work.",
+};
 
 type Photo = { blob: Blob; url: string };
 type Drop = { id: string; title: string; opens_at: string; lot_count: number };
 type Stage = 0 | 1 | 2 | 'review' | 'done';
 
-/** DESIGN.md › Sell flow: photos (3–8, camera-first) → details → drop → review. */
+function dropWhen(iso: string): string {
+  const d = new Date(iso);
+  const day = new Intl.DateTimeFormat('en-NG', { weekday: 'short', day: 'numeric', month: 'short', timeZone: LAGOS_TZ }).format(d);
+  return `${day}, ${formatLagosTime(iso)}`;
+}
+
+/** DESIGN.md › Key screens › Sell flow (PDF p.7, 9, 11, 12, drawn in v2). */
 export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: string }) {
   const supabase = getBrowserSupabase();
   const [stage, setStage] = useState<Stage>(0);
@@ -80,6 +96,11 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
     setStage(stage === 0 ? 1 : stage === 1 ? 2 : 'review');
   }
 
+  function back() {
+    setError(null);
+    setStage(stage === 'review' ? 2 : stage === 2 ? 1 : 0);
+  }
+
   async function submit() {
     if (!priceOk || priceKobo === null) return;
     setError(null);
@@ -117,15 +138,17 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
 
   if (stage === 'done' && drop && lotId) {
     return (
-      <div className="space-y-4 squircle rounded-group bg-surface p-6 text-center">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-pill bg-fill">
-          <Check {...iconProps} size={24} className="text-label" />
+      <div className="space-y-6 py-10 text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-pill bg-fill">
+          <Check {...iconProps} size={28} />
         </span>
-        <h1 className="text-title-sm md:text-title">Your lot goes live {formatGoLive(drop.opens_at)}</h1>
-        <p className="text-secondary">Bidding opens with the {drop.title.toLowerCase()}. We&apos;ll tell you when it sells.</p>
+        <div>
+          <h1 className="text-title-sm md:text-title">Your lot goes live {formatGoLive(drop.opens_at)}</h1>
+          <p className="mt-2 text-body text-secondary">Bidding opens with {drop.title}. We&apos;ll tell you when it sells.</p>
+        </div>
         <div className="flex flex-col gap-2">
-          <Link href={`/lot/${lotId}`} className="inline-flex min-h-11 items-center justify-center rounded-pill bg-label font-semibold text-white">View your lot</Link>
-          <button type="button" className="min-h-11 font-semibold text-label underline underline-offset-2" onClick={() => window.location.reload()}>List another item</button>
+          <Link href={`/lot/${lotId}`} className="pressable inline-flex min-h-14 items-center justify-center rounded-pill bg-label text-headline text-on-label">View your lot</Link>
+          <Button variant="text" block onClick={() => window.location.reload()}>List another item</Button>
         </div>
       </div>
     );
@@ -134,60 +157,95 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
   const stepIndex = typeof stage === 'number' ? stage : 3;
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-title-sm md:text-title">{stage === 'review' ? 'Review your lot' : 'Sell an item'}</h1>
-        <ol className="mt-3 flex gap-2" aria-label="Progress">
-          {STEPS.map((s, i) => (
-            <li key={s} className="flex-1" aria-current={i === stepIndex ? 'step' : undefined}>
-              <span className={`block h-1 rounded-pill ${i <= stepIndex ? 'bg-label' : 'bg-line'}`} />
-              <span className={`mt-1 block text-eyebrow uppercase ${i === stepIndex ? 'text-label' : 'text-secondary'}`}>{i + 1}. {s}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
+    <div className="space-y-6 pb-28">
+      <header className="space-y-4">
+        <div className="flex items-center gap-2">
+          {stage === 0 ? (
+            <Link href="/" aria-label="Close" className="pressable -ml-2 flex h-11 w-11 items-center justify-center rounded-pill"><X {...iconProps} size={22} /></Link>
+          ) : (
+            <button type="button" onClick={back} disabled={Boolean(busy)} aria-label="Back" className="pressable -ml-2 flex h-11 w-11 items-center justify-center rounded-pill">
+              <ArrowLeft {...iconProps} size={22} />
+            </button>
+          )}
+          <p className="text-headline">Sell an item</p>
+          <p className="ml-auto text-subhead text-secondary">{stage === 'review' ? 'Review' : `Step ${stepIndex + 1} of 3`}</p>
+        </div>
+        {stage !== 'review' && (
+          <ol className="flex gap-2" aria-label="Progress">
+            {STEPS.map((s, i) => (
+              <li key={s} className="flex-1" aria-current={i === stepIndex ? 'step' : undefined}>
+                <span className={`block h-1 rounded-pill transition-colors duration-300 ${i <= stepIndex ? 'bg-label' : 'bg-fill'}`} />
+                <span className={`mt-2 block text-footnote ${i === stepIndex ? 'font-semibold text-label' : 'text-secondary'}`}>{s}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </header>
 
       {stage === 0 && (
-        <section className="space-y-3">
-          <p className="text-secondary">Add {MIN_PHOTOS} to {MAX_PHOTOS} real photos in good light. The first one is the cover.</p>
+        <section className="space-y-5">
+          <div>
+            <h1 className="text-title-sm md:text-title">Add {MIN_PHOTOS} to {MAX_PHOTOS} photos</h1>
+            <p className="mt-2 text-body text-secondary">Use real photos in daylight. Show any marks up close so buyers know what they&apos;re getting.</p>
+          </div>
           <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="sr-only" aria-hidden tabIndex={-1}
             onChange={(e) => { void addPhotos(e.target.files); e.target.value = ''; }} />
           <input ref={galleryRef} type="file" accept="image/*" multiple className="sr-only" aria-label="Choose photos from gallery"
             onChange={(e) => { void addPhotos(e.target.files); e.target.value = ''; }} />
-          <div className="grid grid-cols-2 gap-2">
-            <Button tall onClick={() => cameraRef.current?.click()} disabled={photos.length >= MAX_PHOTOS || Boolean(busy)}>
-              <Camera {...iconProps} size={20} /> Take a photo
-            </Button>
-            <Button tall variant="secondary" onClick={() => galleryRef.current?.click()} disabled={photos.length >= MAX_PHOTOS || Boolean(busy)}>
-              <ImagePlus {...iconProps} size={20} /> From gallery
-            </Button>
-          </div>
-          <p className="text-body text-secondary">
-            <span className="tnum">{photos.length}</span> of {MAX_PHOTOS} · {busy ?? 'Photos are shrunk before upload to save data.'}
-          </p>
-          {photos.length > 0 && (
-            <div className="grid grid-cols-4 gap-2">
+          <button type="button" onClick={() => cameraRef.current?.click()} disabled={photos.length >= MAX_PHOTOS || Boolean(busy)}
+            className="pressable squircle flex w-full items-center gap-4 rounded-group bg-label p-4 text-left text-on-label disabled:opacity-50">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-pill bg-on-label text-label"><Camera {...iconProps} size={24} /></span>
+            <span><span className="block text-headline">Take photos</span><span className="block text-subhead opacity-70">Opens your camera</span></span>
+          </button>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-eyebrow uppercase text-secondary">Your photos</p>
+              <p className="tnum text-subhead font-semibold">{photos.length} of {MAX_PHOTOS}</p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
               {photos.map((p, i) => (
-                <div key={p.url} className="relative aspect-square overflow-hidden rounded-card">
+                <div key={p.url} className="squircle relative aspect-square overflow-hidden rounded-thumb bg-fill">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={p.url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
-                  {i === 0 && <span className="absolute bottom-1 left-1 rounded-pill bg-surface px-1 text-[11px] font-semibold">Cover</span>}
+                  {i === 0 && <span className="absolute bottom-2 left-2 rounded-pill bg-label px-2 py-0.5 text-eyebrow uppercase text-on-label">Cover</span>}
                   <button type="button" onClick={() => setPhotos((ps) => ps.filter((_, j) => j !== i))} aria-label={`Remove photo ${i + 1}`}
-                    className="absolute right-0 top-0 flex h-11 w-11 items-start justify-end p-1">
-                    <span className="rounded-pill bg-surface p-0.5"><X {...iconProps} size={14} /></span>
+                    className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center">
+                    <span className="glass-chip flex h-7 w-7 items-center justify-center rounded-pill"><X {...iconProps} size={14} /></span>
                   </button>
                 </div>
               ))}
+              {photos.length < MAX_PHOTOS && (
+                <button type="button" onClick={() => galleryRef.current?.click()} disabled={Boolean(busy)}
+                  className="pressable squircle flex aspect-square flex-col items-center justify-center gap-1 rounded-thumb bg-fill text-subhead font-semibold disabled:opacity-50">
+                  <ImagePlus {...iconProps} size={22} /> Gallery
+                </button>
+              )}
             </div>
-          )}
+            <p className="mt-2 text-footnote text-secondary" aria-live="polite">{busy ?? 'Photos are shrunk before upload to save data.'}</p>
+          </div>
+
+          <ul className="squircle space-y-2 rounded-group bg-surface p-4 text-subhead">
+            <li className="flex gap-2"><Check {...iconProps} size={18} className="mt-0.5 shrink-0" /> Front, back and one close-up of any wear</li>
+            <li className="flex gap-2"><Check {...iconProps} size={18} className="mt-0.5 shrink-0" /> Plain background, no filters</li>
+          </ul>
         </section>
       )}
 
       {stage === 1 && (
-        <section className="space-y-4">
+        <section className="space-y-5">
           <div>
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" minLength={3} maxLength={80} placeholder="e.g. Binatone standing fan" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <h1 className="text-title-sm md:text-title">Tell buyers about it</h1>
+            <p className="mt-2 text-body text-secondary">Short and honest works best.</p>
+          </div>
+          <div>
+            <div className="flex items-baseline justify-between">
+              <Label htmlFor="title">Title</Label>
+              <span className="tnum text-footnote text-secondary" aria-hidden>{title.length}/{TITLE_MAX}</span>
+            </div>
+            <Input id="title" minLength={3} maxLength={TITLE_MAX} placeholder="Brass table lamp, linen shade" value={title}
+              aria-describedby="title-hint" onChange={(e) => setTitle(e.target.value)} />
+            <p id="title-hint" className="mt-2 text-footnote text-secondary">What it is, then one detail that matters.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -197,30 +255,47 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
               </Select>
             </div>
             <div>
-              <Label htmlFor="condition">Condition</Label>
-              <Select id="condition" value={condition} onChange={(e) => setCondition(e.target.value)}>
-                {CONDITIONS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              <Label htmlFor="area">Pickup area</Label>
+              <Select id="area" value={area} onChange={(e) => setArea(e.target.value)}>
+                <option value="">Choose…</option>
+                {LAGOS_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
               </Select>
             </div>
           </div>
+          <fieldset>
+            <legend className="mb-2 text-subhead font-semibold">Condition</legend>
+            <div role="radiogroup" aria-label="Condition" className="flex flex-wrap gap-2">
+              {CONDITIONS.map((c) => (
+                <button key={c.value} type="button" role="radio" aria-checked={condition === c.value} onClick={() => setCondition(c.value)}
+                  className={`pressable min-h-11 rounded-pill px-4 text-subhead font-semibold transition-colors duration-300
+                    ${condition === c.value ? 'bg-label text-on-label' : 'bg-surface text-label'}`}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-footnote text-secondary">{CONDITION_HINT[condition]}</p>
+          </fieldset>
           <div>
-            <Label htmlFor="area">Pickup area</Label>
-            <Select id="area" value={area} onChange={(e) => setArea(e.target.value)}>
-              <option value="">Choose…</option>
-              {LAGOS_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="price">Asking price (₦)</Label>
-            <Input id="price" inputMode="numeric" placeholder="25,000" className="tnum text-title-sm tnum" value={price} onChange={(e) => setPrice(e.target.value)} />
-            <p className="mt-1 text-body text-secondary">
-              {priceOk && priceKobo !== null
-                ? <>Bidding opens at <Price kobo={priceKobo} /> and goes up by at least <Price kobo={previewStep(priceKobo)} />.</>
-                : 'Your asking price is the opening bid. Minimum ₦500.'}
+            <Label htmlFor="price">Asking price</Label>
+            <div className="relative">
+              <span aria-hidden className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-title-sm text-secondary">₦</span>
+              <Input id="price" inputMode="numeric" placeholder="7,000" className="tnum pl-10 text-title-sm" value={price}
+                aria-describedby="price-hint" onChange={(e) => setPrice(e.target.value)} />
+            </div>
+            <p id="price-hint" className="squircle mt-2 flex gap-2 rounded-control bg-surface p-3 text-subhead">
+              <Gavel {...iconProps} size={18} className="mt-0.5 shrink-0" />
+              <span>
+                {priceOk && priceKobo !== null
+                  ? <>Bidding starts at your price. Bids then go up in <Price kobo={previewStep(priceKobo)} className="font-semibold" /> steps.</>
+                  : 'Your asking price is the opening bid. Minimum ₦500.'}
+              </span>
             </p>
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <div className="flex items-baseline justify-between">
+              <Label htmlFor="description">Description</Label>
+              <span className="text-footnote text-secondary">Optional</span>
+            </div>
             <Textarea id="description" rows={4} maxLength={2000} value={description} onChange={(e) => setDescription(e.target.value)}
               placeholder="Age, faults, what's included, pickup notes" />
           </div>
@@ -228,55 +303,78 @@ export function SellFlow({ drops, defaultArea }: { drops: Drop[]; defaultArea: s
       )}
 
       {stage === 2 && (
-        <section className="space-y-2" role="radiogroup" aria-label="Choose a drop">
-          {drops.map((d) => (
-            <label key={d.id} className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-card border bg-surface p-3 ${d.id === dropId ? 'border-ink' : 'border-line'}`}>
-              <input type="radio" name="drop" value={d.id} checked={d.id === dropId} onChange={() => setDropId(d.id)} className="h-4 w-4 accent-[var(--ink)]" />
-              <span>
-                <span className="block font-semibold">{d.title}</span>
-                <span className="block text-body text-secondary">Opens {formatLagosDateTime(d.opens_at)} · <span className="tnum">{d.lot_count}</span> lots</span>
-              </span>
-            </label>
-          ))}
+        <section className="space-y-5">
+          <div>
+            <h1 className="text-title-sm md:text-title">Choose a drop</h1>
+            <p className="mt-2 text-body text-secondary">Your lot goes live with the drop and closes in turn with the others.</p>
+          </div>
+          <div role="radiogroup" aria-label="Choose a drop" className="space-y-2">
+            {drops.map((d) => {
+              const on = d.id === dropId;
+              return (
+                <label key={d.id} className={`squircle flex min-h-16 cursor-pointer items-center gap-3 rounded-group bg-surface p-4 transition-shadow duration-300
+                  ${on ? 'shadow-[0_0_0_2px_var(--label)]' : ''}`}>
+                  <input type="radio" name="drop" value={d.id} checked={on} onChange={() => setDropId(d.id)} className="sr-only" aria-label={d.title} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-headline">{d.title}</span>
+                    <span className="block text-subhead text-secondary">Opens {dropWhen(d.opens_at)} · <span className="tnum">{d.lot_count}</span> lots</span>
+                  </span>
+                  <span aria-hidden className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-pill ${on ? 'bg-label text-on-label' : 'bg-fill'}`}>
+                    {on && <Check {...iconProps} size={14} strokeWidth={2.5} />}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
         </section>
       )}
 
       {stage === 'review' && drop && priceKobo !== null && (
-        <section className="space-y-3 squircle rounded-group bg-surface p-4">
-          <div className="flex gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photos[0]?.url} alt="" className="aspect-[4/3] w-28 rounded-card object-cover" />
-            <div className="min-w-0">
-              <p className="font-semibold">{title}</p>
-              <div className="mt-1 flex flex-wrap gap-1"><Pill>{area}</Pill><Pill>{conditionLabel(condition)}</Pill><Pill>{category}</Pill></div>
+        <section className="space-y-4">
+          <h1 className="text-title-sm md:text-title">Check and list</h1>
+          <div className="squircle overflow-hidden rounded-group bg-surface">
+            <div className="grid aspect-[16/9] grid-cols-[2fr_1fr] grid-rows-2 gap-0.5 bg-fill">
+              {photos.slice(0, 3).map((p, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={p.url} src={p.url} alt="" className={`h-full w-full object-cover ${i === 0 ? 'row-span-2' : ''}`} />
+              ))}
+            </div>
+            <div className="p-4">
+              <h2 className="text-title-sm">{title}</h2>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Pill><MapPin {...iconProps} size={14} /> {area}</Pill><Pill>{conditionLabel(condition)}</Pill><Pill>{category}</Pill>
+              </div>
+              <dl className="mt-3">
+                <GroupedRow label="Starting bid"><Price kobo={priceKobo} /></GroupedRow>
+                <GroupedRow label="Bid steps"><Price kobo={previewStep(priceKobo)} /></GroupedRow>
+                <GroupedRow label="Drop">
+                  <span className="inline-flex items-center gap-2">
+                    {dropWhen(drop.opens_at)}
+                    <button type="button" className="font-semibold underline underline-offset-2" onClick={() => setStage(2)}>Change</button>
+                  </span>
+                </GroupedRow>
+              </dl>
             </div>
           </div>
-          <dl className="grid grid-cols-2 gap-3">
-            <div><dt className="text-eyebrow uppercase text-secondary">Opening bid</dt><dd><Price kobo={priceKobo} className="text-price-card" /></dd></div>
-            <div><dt className="text-eyebrow uppercase text-secondary">Min step</dt><dd><Price kobo={previewStep(priceKobo)} className="text-price-card" /></dd></div>
-            <div className="col-span-2"><dt className="text-eyebrow uppercase text-secondary">Drop</dt><dd>{drop.title} · opens {formatLagosDateTime(drop.opens_at)}</dd></div>
-            <div className="col-span-2"><dt className="text-eyebrow uppercase text-secondary">Photos</dt><dd className="tnum">{photos.length}</dd></div>
-          </dl>
-          <p className="text-body text-secondary">
-            When it sells, the buyer pays us first. We pay you the winning bid minus our fee once you get the buyer&apos;s handover code at pickup.
-          </p>
+          <TrustCard title="You get paid at pickup">
+            The winner pays in the app. You get paid once they hand you their 6-digit code at pickup, minus our fee.
+          </TrustCard>
         </section>
       )}
 
       <ErrorText>{error}</ErrorText>
 
-      <div className="flex gap-2">
-        {stage !== 0 && (
-          <Button variant="secondary" disabled={Boolean(busy)}
-            onClick={() => { setError(null); setStage(stage === 'review' ? 2 : stage === 2 ? 1 : 0); }}>
-            Back
-          </Button>
-        )}
-        {stage === 'review' ? (
-          <Button block tall busy={Boolean(busy)} onClick={submit}>{busy ?? 'List my lot'}</Button>
-        ) : (
-          <Button block tall disabled={Boolean(busy)} onClick={next}>Next</Button>
-        )}
+      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 [background:linear-gradient(to_top,var(--bg)_70%,transparent)]">
+        <div className="mx-auto max-w-lot">
+          {stage === 'review' ? (
+            <Button block tall busy={Boolean(busy)} onClick={submit}>{busy ?? 'List my lot'}</Button>
+          ) : (
+            <Button block tall disabled={Boolean(busy)} onClick={next}>Continue</Button>
+          )}
+          {stage === 'review' && priceKobo !== null && (
+            <p className="mt-2 text-center text-footnote text-secondary">Opening bid {formatNaira(priceKobo)} · bids are final</p>
+          )}
+        </div>
       </div>
     </div>
   );

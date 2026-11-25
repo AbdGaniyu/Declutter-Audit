@@ -18,7 +18,7 @@ export default async function SellPage() {
   const open = drops ?? [];
 
   return (
-    <div className="mx-auto max-w-lot space-y-4">
+    <div className="mx-auto max-w-lot space-y-5">
       {!bank && (
         <p className="squircle rounded-group bg-surface p-3 text-body">
           Add your bank account before your lot sells, so we can pay you after pickup.{' '}
