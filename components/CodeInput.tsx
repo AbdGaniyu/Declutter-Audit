@@ -16,13 +16,13 @@ export function CodeInput({ value, onChange, label, idPrefix }: {
 
   return (
     <fieldset>
-      <legend className="mb-1 text-eyebrow uppercase text-ink-muted">{label}</legend>
+      <legend className="mb-2 text-eyebrow uppercase text-secondary">{label}</legend>
       <div className="flex justify-between gap-2">
         {digits.map((d, i) => (
           <input key={i} id={`${idPrefix}-${i}`} ref={(el) => { refs.current[i] = el; }}
             aria-label={`${label} digit ${i + 1}`} inputMode="numeric" autoComplete={i === 0 ? 'one-time-code' : 'off'}
             value={d}
-            className="h-14 w-full min-w-0 rounded-card border border-line bg-surface text-center font-num text-countdown tabular-nums focus:border-focus"
+            className="squircle tnum h-14 w-full min-w-0 rounded-control bg-fill text-center text-[28px] font-semibold outline-none focus:shadow-[0_0_0_2px_var(--label)]"
             onChange={(e) => {
               const v = e.target.value.replace(/\D/g, '');
               if (v.length > 1) {
