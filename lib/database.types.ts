@@ -454,7 +454,7 @@ isOneToOne: true
                            },
 "my_bids":
 { Args: Record<PropertyKey, never>; Returns: {
-              "area": string,"auction_id": string,"closed_at": string,"current_bid": number,"ends_at": string,"is_leading": boolean,"my_max_bid": number,"outcome": string,"title": string
+              "area": string,"auction_id": string,"closed_at": string,"current_bid": number,"ends_at": string,"is_leading": boolean,"min_next": number,"my_max_bid": number,"outcome": string,"photo": string,"starts_at": string,"title": string
             }[]
                            },
 "my_listings":

@@ -72,7 +72,7 @@ select is((public.get_lot('00000000-0000-0000-0000-0000000a0003') ->> 'lot_no'):
 select is((public.get_lot('00000000-0000-0000-0000-0000000a0003') ->> 'drop_lot_count')::int, 2, 'lot count of drop');
 
 -- Search ------------------------------------------------------------------------------
-select is((select count(*)::int from public.search_lots('LAMP', 20)), 2,
+select is((select count(*)::int from public.search_lots('LAMP', 50) where drop_id in ('00000000-0000-0000-0000-00000000d001', '00000000-0000-0000-0000-00000000d003')), 2,
           'search matches title and description, case-insensitive');
 select ok(not exists (select 1 from public.search_lots('lamp', 20) where id = '00000000-0000-0000-0000-0000000a0004'),
           'search skips ended lots');
@@ -90,9 +90,11 @@ select throws_ok($$ select * from public.admin_drops_week(current_date) $$, 'P00
 select throws_ok($$ select * from public.admin_strikes_week() $$, 'P0001', 'forbidden', 'non-admin: admin_strikes_week');
 
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}';
-select is((select count(*)::int from public.admin_lots('lamp', 'all', 0, 20)), 2, 'admin_lots searches titles');
-select is((select total_count::int from public.admin_lots(null, 'live', 0, 1) limit 1), 2,
-          'admin_lots live filter with total across pages');
+select is((select count(*)::int from public.admin_lots('lamp', 'all', 0, 200) where drop_id in ('00000000-0000-0000-0000-00000000d001', '00000000-0000-0000-0000-00000000d003')), 2, 'admin_lots searches titles');
+select is((select count(*)::int from public.admin_lots(null, 'live', 0, 200) where drop_id = '00000000-0000-0000-0000-00000000d001')
+           + (select (total_count = (select count(*) from public.admin_lots(null, 'live', 0, 200)))::int
+                from public.admin_lots(null, 'live', 0, 1) limit 1), 3,
+          'admin_lots live filter (2 fixture lots) with total across pages');
 select is((select display_name from public.admin_users('1002', 0, 20)), 'Chidi', 'admin_users finds by phone');
 select is((select state from public.admin_drops_week(((now() - interval '10 minutes') at time zone 'Africa/Lagos')::date)
             where drop_id = '00000000-0000-0000-0000-00000000d001'), 'live', 'week view marks the live drop');
