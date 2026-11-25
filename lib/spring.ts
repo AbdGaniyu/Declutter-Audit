@@ -90,3 +90,25 @@ export function animateSpring(o: {
     },
   };
 }
+
+/**
+ * A CSS `linear()` easing that traces a spring from 0 to 1, for CSS transitions
+ * (digit roll, press). Browsers without linear() ignore it and change instantly.
+ */
+export function springEasing(s: Spring, durationMs: number, points = 24): string {
+  const stops = Array.from({ length: points + 1 }, (_, i) => {
+    const t = (i / points) * durationMs;
+    const x = springAt(0, 1, 0, s, t).x;
+    return `${x.toFixed(4)} ${((i / points) * 100).toFixed(1)}%`;
+  });
+  return `linear(${stops.join(', ')})`;
+}
+
+/** How long a spring takes to settle within 0.1%, rounded to 10ms (for CSS durations). */
+export function settleTime(s: Spring): number {
+  for (let t = 0; t < 3000; t += 10) {
+    const rest = [0, 10, 20, 40].every((d) => Math.abs(springAt(0, 1, 0, s, t + d).x - 1) < 0.001);
+    if (rest) return t;
+  }
+  return 3000;
+}
