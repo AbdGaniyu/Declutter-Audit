@@ -40,8 +40,8 @@ select is((select starts_at = (select opens_at from public.drops where id = (sel
           true, 'lot opens with the drop');
 select is((select step from public.auctions where id = (select id from t_ids where k = 'lot0')), 100000::bigint,
           '₦25,000 asking price → ₦1,000 step');
-select is((select step from public.auctions where id = (select id from t_ids where k = 'lot1')), 50000::bigint,
-          '₦8,000 asking price → ₦500 step');
+select is((select step from public.auctions where id = (select id from t_ids where k = 'lot1')), 20000::bigint,
+          '₦8,000 asking price → ₦200 step');
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}';
