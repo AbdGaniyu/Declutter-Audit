@@ -1,55 +1,74 @@
-import { Check, CircleAlert, Clock, Minus } from 'lucide-react';
+import { ArrowUp, Check, CircleAlert, CircleCheck, Clock, Minus, Trophy, X } from 'lucide-react';
 import { iconProps } from '@/components/icons';
 
-// Badges are uppercase labels: LIVE, UPCOMING, ENDED, UNSOLD (+ SOLD).
-// Small text never sits in a status color (contrast): status is carried by a
-// colored dot or icon plus the label in --ink.
-type Kind = 'live' | 'upcoming' | 'ended' | 'unsold' | 'sold';
+// DESIGN.md › Badges and status. Status is monochrome and always carries an icon or
+// a word. No green, amber or orange.
+type Kind = 'live' | 'upcoming' | 'ended' | 'unsold' | 'sold' | 'action';
 
-const styles: Record<Kind, string> = {
-  live: 'bg-live-soft text-ink',
-  upcoming: 'bg-surface text-ink-muted border border-line',
-  ended: 'bg-bg text-ink-muted border border-line',
-  unsold: 'bg-bg text-ink-muted border border-line',
-  sold: 'bg-winning-soft text-ink',
+const labels: Record<Kind, string> = {
+  live: 'Live', upcoming: 'Upcoming', ended: 'Ended', unsold: 'Unsold', sold: 'Sold', action: '',
 };
 
-const labels: Record<Kind, string> = { live: 'Live', upcoming: 'Upcoming', ended: 'Ended', unsold: 'Unsold', sold: 'Sold' };
-
+/** Uppercase eyebrow capsule. `action` is the one that needs doing (READY FOR PICKUP). */
 export function Badge({ kind, children }: { kind: Kind; children?: React.ReactNode }) {
+  const solid = kind === 'action';
   return (
-    <span className={`inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-eyebrow uppercase ${styles[kind]}`}>
+    <span className={`inline-flex items-center gap-1 rounded-pill px-2 py-0.5 text-eyebrow uppercase
+      ${solid ? 'bg-label text-on-label' : 'bg-fill text-secondary'}`}>
       {kind === 'live' && <LiveDot />}
       {kind === 'upcoming' && <Clock {...iconProps} size={12} />}
-      {(kind === 'ended' || kind === 'unsold') && <Minus {...iconProps} size={12} className="text-ended" />}
-      {kind === 'sold' && <Check {...iconProps} size={12} className="text-winning" />}
+      {(kind === 'ended' || kind === 'unsold') && <Minus {...iconProps} size={12} />}
+      {kind === 'sold' && <Check {...iconProps} size={12} />}
       {children ?? labels[kind]}
     </span>
   );
 }
 
+/** The "●" before LIVE NOW. Monochrome; pulses unless reduced motion. */
 export function LiveDot({ className = '' }: { className?: string }) {
-  return <span className={`inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-pill bg-live motion-reduce:animate-none ${className}`} aria-hidden />;
+  return <span className={`inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-pill bg-current motion-reduce:animate-none ${className}`} aria-hidden />;
 }
 
-/** Sentence-case pills for area and condition. */
-export function Pill({ children }: { children: React.ReactNode }) {
+/** Sentence-case pills for area, condition and category. */
+export function Pill({ children, glass = false }: { children: React.ReactNode; glass?: boolean }) {
   return (
-    <span className="inline-flex items-center rounded-pill border border-line bg-surface px-2 py-0.5 text-[12px] font-semibold leading-4 text-ink">
+    <span className={`inline-flex items-center gap-1 rounded-pill px-3 py-0.5 text-footnote font-semibold text-label
+      ${glass ? 'glass-chip' : 'bg-fill'}`}>
       {children}
     </span>
   );
 }
 
-/** Inline status chip with icon + label (never color alone). */
-export function StatusChip({ kind }: { kind: 'winning' | 'outbid' }) {
-  return kind === 'winning' ? (
-    <span className="inline-flex items-center gap-1 rounded-pill bg-winning-soft px-2 py-0.5 text-eyebrow uppercase text-ink">
-      <Check {...iconProps} size={12} className="text-winning" /> Winning
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 rounded-pill bg-outbid-soft px-2 py-0.5 text-eyebrow uppercase text-ink">
-      <CircleAlert {...iconProps} size={12} className="text-outbid" /> Outbid
-    </span>
-  );
+export type Standing = 'winning' | 'outbid' | 'won' | 'lost';
+
+/** Compact standing for lists (My bids). Same icons and words as WhereYouStand. */
+export function StatusChip({ kind }: { kind: Standing }) {
+  switch (kind) {
+    case 'winning':
+      return (
+        <span className="inline-flex items-center gap-1 text-eyebrow uppercase text-label">
+          <CircleCheck {...iconProps} size={14} /> Top bidder
+        </span>
+      );
+    case 'outbid':
+      return (
+        <span className="inline-flex items-center gap-1 rounded-pill bg-label px-2 py-0.5 text-eyebrow uppercase text-on-label">
+          <ArrowUp {...iconProps} size={12} /> Outbid
+        </span>
+      );
+    case 'won':
+      return (
+        <span className="inline-flex items-center gap-1 text-eyebrow uppercase text-label">
+          <Trophy {...iconProps} size={14} /> Won
+        </span>
+      );
+    case 'lost':
+      return (
+        <span className="inline-flex items-center gap-1 text-eyebrow uppercase text-secondary">
+          <X {...iconProps} size={14} /> Lost
+        </span>
+      );
+  }
 }
+
+export { CircleAlert as RejectedIcon };
