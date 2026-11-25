@@ -28,8 +28,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function LotPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function LotPage({ params, searchParams }: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ amount?: string }>;
+}) {
   const r = await loadLot((await params).id);
   if (!r) notFound();
-  return <LiveLot initial={r.lot} signedIn={r.signedIn} />;
+  // "Bid ₦X" from My bids preselects that chip (kobo). Display only; place_bid re-checks it.
+  const amount = Number((await searchParams).amount);
+  return <LiveLot initial={r.lot} signedIn={r.signedIn} preferAmount={Number.isSafeInteger(amount) && amount > 0 ? amount : null} />;
 }

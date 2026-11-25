@@ -67,6 +67,8 @@ const config: Config = {
       4: '16px',
       5: '20px',
       6: '24px',
+      7: '28px', // component size: countdown pill height
+      10: '40px', // component size: date block, gutters
       8: '32px',
       11: '44px',
       12: '48px',

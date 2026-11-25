@@ -79,7 +79,7 @@ export function TopBarNav({ userId, isAdmin }: { userId: string | null; isAdmin:
                 </Link>
               </>
             ) : (
-              <Link href={`/login?next=${encodeURIComponent(path)}`} className="pressable inline-flex h-11 items-center rounded-pill bg-label px-4 text-subhead font-semibold text-on-label">
+              <Link href={`/login?next=${encodeURIComponent(path)}`} className="pressable inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-pill bg-label px-4 text-subhead font-semibold text-on-label">
                 Sign in
               </Link>
             )}
