@@ -6,14 +6,16 @@ Read **CLAUDE.md** (product rules) and **DESIGN.md** (UI tokens) first.
 
 ## Quick start
 
+> **Use the project's Supabase CLI (`npx supabase …`), not a global install.** The repo pins CLI v3.x in `package.json`. An older global CLI (e.g. Homebrew v2.x) starts Auth with phone sign-in disabled ("Unsupported phone provider") and builds a `storage` schema that newer Storage images can't upload into. If the stack was ever started with another CLI version, recreate it: `npx supabase stop --no-backup && npx supabase start`.
+
 ```bash
 npm install
-cp .env.example .env.local                       # fill NEXT_PUBLIC_SUPABASE_ANON_KEY from `supabase start`
+cp .env.example .env.local                       # fill NEXT_PUBLIC_SUPABASE_ANON_KEY from `npx supabase start`
 cp supabase/functions/.env.example supabase/functions/.env
 npx web-push generate-vapid-keys                 # put keys in functions/.env, public key in .env.local
-supabase start                                   # Postgres, Auth, Realtime, Storage, Edge Runtime
-supabase db reset                                # migrations + seed (a week of 7pm drops)
-supabase functions serve --env-file supabase/functions/.env
+npx supabase start                               # Postgres, Auth, Realtime, Storage, Edge Runtime
+npx supabase db reset                            # migrations + seed (a week of 7pm drops)
+npx supabase functions serve --env-file supabase/functions/.env
 npm run mock:paystack                            # optional: local Paystack stand-in on :4010
 npm run dev
 ```
@@ -34,6 +36,8 @@ update public.profiles set is_admin = true where phone = '2348000000001';
 | `npm run test:db` | pgTAP (`supabase test db`): bidding rules, soft close, RLS, listing, closing idempotency, payments, handover/payouts, strikes, hardening |
 | `npm run test:race` | 50 concurrent bids: one accepted per price level, `current_bid` = max accepted, nothing accepted after `ends_at` |
 | `npm run test:e2e` | Playwright: live bidding between two users, listing with photo upload, admin, and the full win → pay → handover → payout loop against the mock Paystack |
+
+Before the first e2e run, install the browser: `npx playwright install chromium`.
 
 The e2e payment test needs the Edge Functions running with `PAYSTACK_API_URL` pointing at the mock (`http://host.docker.internal:4010` from the edge-runtime container).
 
