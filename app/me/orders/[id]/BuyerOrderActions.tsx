@@ -1,24 +1,32 @@
 'use client';
-import { Phone, ShieldCheck } from 'lucide-react';
+import { Clock, Lock, Phone } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
 import { DisputeButton } from '@/components/DisputeButton';
 import { Card, ErrorText } from '@/components/Field';
+import { TrustCard } from '@/components/GroupedList';
 import { iconProps } from '@/components/icons';
 import { messageFor } from '@/lib/errors';
 import { statusLabel } from '@/lib/orders';
 import { subscribeTopic } from '@/lib/realtime';
 import { getBrowserSupabase } from '@/lib/supabase/client';
-import { formatCountdown, formatLagosTime } from '@/lib/time';
+import { formatNaira } from '@/lib/money';
+import { shortTitle } from '@/lib/drop';
+import { formatClock } from '@/lib/time';
 import { useServerNow } from '@/lib/time-sync';
 
 type Props = {
-  order: { id: string; status: string; pay_by: string; offer_round: number; seller_phone: string | null; refunded_at: string | null };
+  order: {
+    id: string; status: string; pay_by: string; offer_round: number; amount: number; title: string; area: string;
+    seller_name: string; seller_phone: string | null; refunded_at: string | null;
+  };
+  /** Order summary card, rendered between the pay-by banner and the explainer. */
+  summary: React.ReactNode;
   userId: string;
 };
 
-export function BuyerOrderActions({ order, userId }: Props) {
+export function BuyerOrderActions({ order, summary, userId }: Props) {
   const supabase = getBrowserSupabase();
   const router = useRouter();
   const params = useSearchParams();
@@ -79,16 +87,15 @@ export function BuyerOrderActions({ order, userId }: Props) {
     router.refresh();
   }
 
+  const item = shortTitle(order.title).toLowerCase();
   const explainer = (
-    <div className="flex gap-3 rounded-card border border-line bg-surface p-4">
-      <ShieldCheck {...iconProps} size={24} className="shrink-0 text-winning" />
-      <div>
-        <p className="font-semibold">Your money is held until you collect the item</p>
-        <p className="mt-1 text-body text-ink-muted">
-          We only pay the seller after you have the item and give them your 6-digit handover code. If something&apos;s wrong, report it and we&apos;ll step in.
-        </p>
-      </div>
-    </div>
+    <TrustCard title="Your money is held until you collect the item"
+      steps={[
+        <>Pay now. We hold the {formatNaira(order.amount)}. {order.seller_name} can&apos;t touch it yet.</>,
+        <>Meet {order.seller_name} in {order.area} and check the {item}.</>,
+        <>Happy with it? Give {order.seller_name} your 6-digit code. That releases the money.</>,
+      ]}
+      footer="Not what was described? Keep the code and tap Report a problem. We'll step in." />
   );
 
   if (order.status === 'awaiting_payment') {
@@ -102,25 +109,30 @@ export function BuyerOrderActions({ order, userId }: Props) {
       );
     }
     return (
-      <div className="space-y-4">
-        <Card>
-          <p className="text-eyebrow uppercase text-ink-muted">Pay within</p>
+      <div className="space-y-4 pb-28">
+        <p role="status" className="squircle flex items-start gap-3 rounded-group bg-fill p-4 text-headline">
+          <Clock {...iconProps} size={20} className="mt-0.5 shrink-0" />
           {left > 0 ? (
-            <p className={`font-num text-countdown tabular-nums ${left <= 60_000 ? 'text-live' : 'text-ink'}`}>{formatCountdown(left)}</p>
-          ) : (
-            <p className="text-ink">Time is up. If you already paid, it will be confirmed or refunded.</p>
-          )}
-          <p className="mt-1 text-body text-ink-muted">
-            By {formatLagosTime(order.pay_by)}, or it goes to the next bidder{order.offer_round === 1 ? ' and counts as a strike' : ''}.
-          </p>
-        </Card>
+            <span>
+              Pay within <span className={`tnum ${left <= 60_000 ? 'text-accent-text' : ''}`}>{formatClock(left)}</span> or it goes to the next bidder
+              {order.offer_round === 1 ? ', and it counts as a strike.' : '.'}
+            </span>
+          ) : <span>Time is up. If you already paid, it will be confirmed or refunded.</span>}
+        </p>
+        {summary}
         {explainer}
         <ErrorText>{error}</ErrorText>
-        <Button block tall busy={busy} disabled={left <= 0} onClick={pay}>Pay now</Button>
-        <p className="text-center text-body text-ink-muted">Card, bank transfer or USSD, via Paystack.</p>
         {order.offer_round === 2 && (
-          <Button block variant="link" disabled={busy} onClick={decline}>No thanks, decline this offer</Button>
+          <Button block variant="text" disabled={busy} onClick={decline}>No thanks, decline this offer</Button>
         )}
+        <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 [background:linear-gradient(to_top,var(--bg)_70%,transparent)]">
+          <div className="mx-auto max-w-lot">
+            <Button block tall busy={busy} disabled={left <= 0} onClick={pay}>
+              <Lock {...iconProps} size={18} /> Pay {formatNaira(order.amount)}
+            </Button>
+            <p className="mt-2 text-center text-footnote text-secondary">Secure checkout by Paystack · card, transfer or USSD</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -128,14 +140,15 @@ export function BuyerOrderActions({ order, userId }: Props) {
   if (order.status === 'paid') {
     return (
       <div className="space-y-4">
-        <Card className="text-center">
-          <p className="text-eyebrow uppercase text-ink-muted">Your handover code</p>
-          <p className="my-3 font-num text-code tabular-nums" aria-label="Handover code">{code ?? '······'}</p>
-          <p className="font-semibold">Give this code to the seller only when you have the item.</p>
-        </Card>
+        <section className="squircle rounded-group bg-surface p-6 text-center">
+          <p className="text-eyebrow uppercase text-secondary">Your handover code</p>
+          <p className="tnum my-3 text-code" aria-label="Handover code">{code ?? '······'}</p>
+          <p className="text-headline">Give this code to {order.seller_name} only when you have the item.</p>
+        </section>
+        {summary}
         {order.seller_phone && (
-          <a href={`tel:+${order.seller_phone}`} className="flex min-h-11 items-center justify-center gap-2 rounded-pill border border-line bg-surface font-semibold">
-            <Phone {...iconProps} size={18} /> Call seller to arrange pickup
+          <a href={`tel:+${order.seller_phone}`} className="pressable flex min-h-12 items-center justify-center gap-2 rounded-pill bg-fill text-headline">
+            <Phone {...iconProps} size={18} /> Call {order.seller_name} to arrange pickup
           </a>
         )}
         <DisputeButton orderId={order.id} />
