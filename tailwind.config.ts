@@ -17,21 +17,9 @@ const config: Config = {
       accent: { DEFAULT: 'var(--accent)', text: 'var(--accent-text)' },
       'on-label': 'var(--on-label)',
       focus: 'var(--focus)',
-
-      // TEMPORARY v1 aliases (plan task 40 removes them). They map old names onto
-      // v2 values so un-migrated screens keep rendering: status is monochrome now.
-      ink: { DEFAULT: 'var(--label)', muted: 'var(--secondary)' },
-      line: 'var(--hairline)',
-      live: { DEFAULT: 'var(--accent)', soft: 'var(--fill)' },
-      winning: { DEFAULT: 'var(--label)', soft: 'var(--fill)' },
-      outbid: { DEFAULT: 'var(--label)', soft: 'var(--fill)' },
-      ended: 'var(--secondary)',
     },
     fontFamily: {
       sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'var(--font-inter)', 'system-ui', 'sans-serif'],
-      // TEMPORARY v1 aliases: one family now.
-      display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'var(--font-inter)', 'system-ui', 'sans-serif'],
-      num: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'var(--font-inter)', 'system-ui', 'sans-serif'],
     },
     fontSize: {
       // Type roles (DESIGN.md › Typography)
@@ -51,10 +39,6 @@ const config: Config = {
       'price-card': ['20px', { lineHeight: '24px', fontWeight: '700' }],
       code: ['40px', { lineHeight: '44px', fontWeight: '700', letterSpacing: '0.3em' }],
 
-      // TEMPORARY v1 aliases.
-      display: ['28px', { lineHeight: '34px', fontWeight: '700', letterSpacing: '-0.02em' }],
-      heading: ['20px', { lineHeight: '26px', fontWeight: '600' }],
-      countdown: ['32px', { lineHeight: '36px', fontWeight: '700' }],
     },
     spacing: {
       0: '0',
@@ -86,10 +70,9 @@ const config: Config = {
         card: '24px',
         dock: '28px',
         pill: '999px',
-        sheet: '28px', // TEMPORARY v1 alias
       },
-      boxShadow: { float: 'var(--float-shadow)', elev: 'var(--float-shadow)' /* TEMPORARY v1 alias */ },
-      maxWidth: { content: '1136px', lot: '560px', grid: '1136px' },
+      boxShadow: { float: 'var(--float-shadow)' },
+      maxWidth: { content: '1136px', lot: '560px' },
       transitionTimingFunction: { spring: 'cubic-bezier(0.2, 0.9, 0.3, 1)' },
     },
   },

@@ -14,7 +14,7 @@ export function DisputeButton({ orderId }: { orderId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!open) return <Button block variant="link" onClick={() => setOpen(true)}>Report a problem</Button>;
+  if (!open) return <Button block variant="text" onClick={() => setOpen(true)}>Report a problem</Button>;
   return (
     <div className="space-y-3 squircle rounded-group bg-surface p-4">
       <div>

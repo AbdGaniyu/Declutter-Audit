@@ -4,15 +4,13 @@ import { iconProps } from '@/components/icons';
 
 // DESIGN.md › Buttons. Capsules, no borders. Crimson is only for the bid action,
 // which is SlideToBid, plus "Bid ₦X" shortcuts (variant "bid").
-type Variant = 'primary' | 'secondary' | 'text' | 'bid' | /* TEMPORARY v1 aliases */ 'live' | 'link';
+type Variant = 'primary' | 'secondary' | 'text' | 'bid';
 
 const styles: Record<Variant, string> = {
   primary: 'bg-label text-on-label font-semibold',
   secondary: 'bg-fill text-label font-semibold',
   text: 'bg-transparent text-label font-semibold underline-offset-2 hover:underline',
   bid: 'bg-accent text-white font-semibold',
-  live: 'bg-accent text-white font-semibold',
-  link: 'bg-transparent text-label font-semibold underline-offset-2 hover:underline',
 };
 
 export function Button({
@@ -25,7 +23,7 @@ export function Button({
   disabled,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; block?: boolean; busy?: boolean; tall?: boolean }) {
-  const flat = variant === 'text' || variant === 'link';
+  const flat = variant === 'text';
   return (
     <button
       {...props}
